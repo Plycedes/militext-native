@@ -1,10 +1,11 @@
-import { Text, View } from "react-native";
+import { Text } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
     return (
-        <View className="">
-            <Text className="text-3xl font-bold">Test</Text>
-        </View>
+        <SafeAreaView className="flex h-screen items-center justify-center">
+            <Text className="text-5xl font-pbold">Test</Text>
+        </SafeAreaView>
     );
 }
 
