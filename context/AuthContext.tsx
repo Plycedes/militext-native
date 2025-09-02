@@ -40,7 +40,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     }) => {
         try {
             await registerUser(data);
-            router.replace("/login");
+            router.replace("/sign-in");
         } catch (error: any) {
             console.log("Error occured", error);
         }
@@ -49,7 +49,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     const logout = async () => {
         try {
             await logoutUser();
-            router.replace("/login");
+            router.replace("/sign-in");
         } catch (error: any) {
             console.log("Error occured", error);
         }
@@ -63,6 +63,8 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
             if (_token && _user?._id) {
                 setUser(_user);
                 setToken(_token);
+            } else {
+                router.replace("/sign-in");
             }
         })();
         setIsLoading(false);
