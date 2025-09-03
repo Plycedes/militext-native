@@ -1,3 +1,5 @@
+import { Ionicons } from "@expo/vector-icons";
+
 export interface UserInterface {
     _id: string;
     avatar: {
@@ -21,4 +23,23 @@ export interface AuthContextType {
         password: string;
     }) => Promise<void>;
     logout: () => Promise<void>;
+}
+
+export interface Chat {
+    id: string;
+    name: string;
+    lastMessage: string;
+    timestamp: string;
+    unreadCount: number;
+    isOnline: boolean;
+    isGroup: boolean;
+    avatar?: string;
+    participants?: number;
+}
+
+export interface DropdownOption {
+    id: string;
+    label: string;
+    icon: keyof typeof Ionicons.glyphMap;
+    action: () => void;
 }
