@@ -1,9 +1,9 @@
+import { GlassButton } from "@/components";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React, { JSX, useRef, useState } from "react";
 import {
-    ActivityIndicator,
     Alert,
     Animated,
     SafeAreaView,
@@ -211,7 +211,7 @@ const CreateChatPage: React.FC = () => {
                         </Text>
                         <LinearGradient
                             colors={["rgba(0,255,255,0.05)", "rgba(0,200,255,0.05)"]}
-                            className="rounded-xl p-1 flex-row border border-cyan-400/20"
+                            className="rounded-xl p-1 flex-row border border-cyan-400/30"
                         >
                             {["individual", "group"].map((mode) => (
                                 <TouchableOpacity
@@ -249,7 +249,7 @@ const CreateChatPage: React.FC = () => {
                     {/* Form */}
                     <LinearGradient
                         colors={["rgba(0,255,255,0.08)", "rgba(0,200,255,0.04)", "rgba(0,0,0,0.1)"]}
-                        className="rounded-2xl p-6 border border-cyan-500/20 shadow-lg shadow-cyan-400/20"
+                        className="rounded-2xl p-6 border border-cyan-500/30 shadow-lg shadow-cyan-400/20"
                     >
                         {chatMode === "group" && (
                             <View className="mb-6">
@@ -312,27 +312,11 @@ const CreateChatPage: React.FC = () => {
                         )}
 
                         {/* Button */}
-                        <TouchableOpacity
+                        <GlassButton
+                            title="Connect to Grid"
                             onPress={handleCreateChat}
-                            disabled={isLoading}
-                            className="mt-2 rounded-xl overflow-hidden"
-                        >
-                            <LinearGradient
-                                colors={["#00f5ff", "#00d4ff", "#0ea5e9"]}
-                                className="py-4 items-center justify-center rounded-xl shadow-lg shadow-cyan-400/40"
-                            >
-                                {isLoading ? (
-                                    <ActivityIndicator size="small" color="#fff" />
-                                ) : (
-                                    <View className="flex-row items-center">
-                                        <Ionicons name="radio-outline" size={18} color="#fff" />
-                                        <Text className="ml-2 text-white font-semibold tracking-wide">
-                                            Establish Connection
-                                        </Text>
-                                    </View>
-                                )}
-                            </LinearGradient>
-                        </TouchableOpacity>
+                            isLoading={isLoading}
+                        />
                     </LinearGradient>
                 </ScrollView>
             </LinearGradient>

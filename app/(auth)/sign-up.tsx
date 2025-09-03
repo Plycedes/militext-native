@@ -1,3 +1,4 @@
+import { GlassButton } from "@/components";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
@@ -196,7 +197,7 @@ const SignUpPage: React.FC = () => {
                         </View>
 
                         {/* Sign Up Button */}
-                        <TouchableOpacity
+                        {/* <TouchableOpacity
                             className="mb-4"
                             onPress={handleSignUp}
                             disabled={isLoading}
@@ -209,7 +210,12 @@ const SignUpPage: React.FC = () => {
                                     {isLoading ? "Initializing..." : "Initialize Connection"}
                                 </Text>
                             </LinearGradient>
-                        </TouchableOpacity>
+                        </TouchableOpacity> */}
+                        <GlassButton
+                            title="Initialize Connection"
+                            onPress={handleSignUp}
+                            isLoading={isLoading}
+                        />
 
                         {/* Terms */}
                         <Text className="text-xs text-gray-400 text-center mb-4">

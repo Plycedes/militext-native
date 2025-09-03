@@ -1,3 +1,4 @@
+import { GlassButton } from "@/components";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
@@ -188,25 +189,11 @@ const SignInPage: React.FC = () => {
                         </View>
 
                         {/* Sign In Button */}
-                        <TouchableOpacity
-                            className="mb-4"
+                        <GlassButton
+                            title="Connect to Grid"
                             onPress={handleSignIn}
-                            disabled={isLoading}
-                        >
-                            <LinearGradient
-                                colors={["#00d4ff", "#0ea5e9", "#3b82f6"]}
-                                className="rounded-xl py-4 px-6 shadow-lg shadow-cyan-500/30"
-                            >
-                                <View className="flex-row items-center justify-center">
-                                    {isLoading && (
-                                        <View className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-3" />
-                                    )}
-                                    <Text className="text-white text-center font-bold text-lg">
-                                        {isLoading ? "Connecting..." : "Connect to Grid"}
-                                    </Text>
-                                </View>
-                            </LinearGradient>
-                        </TouchableOpacity>
+                            isLoading={isLoading}
+                        />
 
                         {/* Quick Access */}
                         <TouchableOpacity className="mb-6 bg-gray-800/30 rounded-xl py-3 px-4 border border-gray-700/30">

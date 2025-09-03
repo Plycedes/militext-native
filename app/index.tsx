@@ -1,3 +1,4 @@
+import { GlassButton } from "@/components";
 import { Chat, DropdownOption } from "@/types/misc";
 import { mockChats } from "@/utils/mockdata";
 import { Ionicons } from "@expo/vector-icons";
@@ -122,62 +123,147 @@ const AllChatsPage: React.FC = () => {
         // router.push(`/chat/${chatId}`);
     };
 
-    const renderChatItem = ({ item }: { item: Chat }): JSX.Element => (
-        <TouchableOpacity onPress={() => navigateToChat(item.id)} className="mx-4 mb-3">
-            <LinearGradient
-                colors={["rgba(0,212,255,0.05)", "rgba(14,165,233,0.08)"]}
-                className="rounded-2xl p-4 border border-cyan-500/30 backdrop-blur-md"
-            >
-                <View className="flex-row items-center">
-                    <View
-                        className={`w-12 h-12 rounded-full items-center justify-center border-2 ${
-                            item.isOnline
-                                ? "border-cyan-400/70 bg-cyan-400/10"
-                                : "border-gray-600/50 bg-gray-700/10"
-                        }`}
-                    >
-                        <Ionicons
-                            name={item.isGroup ? "people-outline" : "person-outline"}
-                            size={24}
-                            color={item.isOnline ? "#00f6ff" : "#6b7280"}
-                        />
-                    </View>
+    // const renderChatItem = ({ item }: { item: Chat }): JSX.Element => (
+    //     <TouchableOpacity onPress={() => navigateToChat(item.id)} className="mx-4 mb-3">
+    //         <LinearGradient
+    //             colors={["rgba(0,212,255,0.05)", "rgba(14,165,233,0.08)"]}
+    //             className="rounded-2xl p-4 border border-cyan-500/30 backdrop-blur-md"
+    //         >
+    //             <View className="flex-row items-center">
+    //                 <View
+    //                     className={`w-12 h-12 rounded-full items-center justify-center border-2 ${
+    //                         item.isOnline
+    //                             ? "border-cyan-400/70 bg-cyan-400/10"
+    //                             : "border-gray-600/50 bg-gray-700/10"
+    //                     }`}
+    //                 >
+    //                     <Ionicons
+    //                         name={item.isGroup ? "people-outline" : "person-outline"}
+    //                         size={24}
+    //                         color={item.isOnline ? "#00f6ff" : "#6b7280"}
+    //                     />
+    //                 </View>
 
-                    {/* Chat Info */}
-                    <View className="flex-1 ml-4">
-                        <View className="flex-row items-center justify-between mb-1">
-                            <View className="flex-row items-center">
-                                <Text className="text-white font-semibold text-base">
-                                    {item.name}
-                                </Text>
-                                {item.isGroup && (
-                                    <View className="ml-2 bg-cyan-500/20 rounded-full px-2 py-0.5">
-                                        <Text className="text-cyan-400 text-xs">
-                                            {item.participants}
-                                        </Text>
-                                    </View>
-                                )}
-                            </View>
-                            <Text className="text-gray-400 text-xs">{item.timestamp}</Text>
+    //                 {/* Chat Info */}
+    //                 <View className="flex-1 ml-4">
+    //                     <View className="flex-row items-center justify-between mb-1">
+    //                         <View className="flex-row items-center">
+    //                             <Text className="text-white font-semibold text-base">
+    //                                 {item.name}
+    //                             </Text>
+    //                             {item.isGroup && (
+    //                                 <View className="ml-2 bg-cyan-500/20 rounded-full px-2 py-0.5">
+    //                                     <Text className="text-cyan-400 text-xs">
+    //                                         {item.participants}
+    //                                     </Text>
+    //                                 </View>
+    //                             )}
+    //                         </View>
+    //                         <Text className="text-gray-400 text-xs">{item.timestamp}</Text>
+    //                     </View>
+
+    //                     <Text className="text-gray-300 text-sm" numberOfLines={1}>
+    //                         {item.lastMessage}
+    //                     </Text>
+    //                 </View>
+
+    //                 {/* Unread Badge */}
+    //                 {item.unreadCount > 0 && (
+    //                     <View className="bg-cyan-500 rounded-full min-w-[20px] h-5 items-center justify-center ml-2">
+    //                         <Text className="text-white text-xs font-bold">
+    //                             {item.unreadCount > 99 ? "99+" : item.unreadCount}
+    //                         </Text>
+    //                     </View>
+    //                 )}
+    //             </View>
+    //         </LinearGradient>
+    //     </TouchableOpacity>
+    // );
+
+    const renderChatItem = ({ item }: { item: Chat }): JSX.Element => {
+        const isUnread = item.unreadCount > 0;
+
+        return (
+            <TouchableOpacity onPress={() => navigateToChat(item.id)} className="mx-4 mb-3">
+                <LinearGradient
+                    colors={
+                        isUnread
+                            ? ["rgba(255, 215, 0, 0.08)", "rgba(255, 200, 0, 0.12)"] // Yellow glossy
+                            : ["rgba(0,212,255,0.05)", "rgba(14,165,233,0.08)"] // Cyan glossy
+                    }
+                    className={`rounded-2xl p-4 backdrop-blur-md ${
+                        isUnread
+                            ? "border border-yellow-400/40 shadow-lg shadow-yellow-400/20"
+                            : "border border-cyan-500/30"
+                    }`}
+                >
+                    <View className="flex-row items-center">
+                        <View
+                            className={`w-12 h-12 rounded-full items-center justify-center border-2 ${
+                                item.isOnline
+                                    ? isUnread
+                                        ? "border-yellow-400/70 bg-yellow-400/10"
+                                        : "border-cyan-400/70 bg-cyan-400/10"
+                                    : "border-gray-600/50 bg-gray-700/10"
+                            }`}
+                        >
+                            <Ionicons
+                                name={item.isGroup ? "people-outline" : "person-outline"}
+                                size={24}
+                                color={
+                                    isUnread
+                                        ? "#FFD700" // Gold for unread
+                                        : item.isOnline
+                                          ? "#00f6ff"
+                                          : "#6b7280"
+                                }
+                            />
                         </View>
 
-                        <Text className="text-gray-300 text-sm" numberOfLines={1}>
-                            {item.lastMessage}
-                        </Text>
-                    </View>
+                        {/* Chat Info */}
+                        <View className="flex-1 ml-4">
+                            <View className="flex-row items-center justify-between mb-1">
+                                <View className="flex-row items-center">
+                                    <Text className="text-white font-semibold text-base">
+                                        {item.name}
+                                    </Text>
+                                    {item.isGroup && (
+                                        <View
+                                            className={`ml-2 rounded-full px-2 py-0.5 ${
+                                                isUnread ? "bg-yellow-400/20" : "bg-cyan-500/20"
+                                            }`}
+                                        >
+                                            <Text
+                                                className={`text-xs ${
+                                                    isUnread ? "text-yellow-400" : "text-cyan-400"
+                                                }`}
+                                            >
+                                                {item.participants}
+                                            </Text>
+                                        </View>
+                                    )}
+                                </View>
+                                <Text className="text-gray-400 text-xs">{item.timestamp}</Text>
+                            </View>
 
-                    {/* Unread Badge */}
-                    {item.unreadCount > 0 && (
-                        <View className="bg-cyan-500 rounded-full min-w-[20px] h-5 items-center justify-center ml-2">
-                            <Text className="text-white text-xs font-bold">
-                                {item.unreadCount > 99 ? "99+" : item.unreadCount}
+                            <Text className="text-gray-300 text-sm" numberOfLines={1}>
+                                {item.lastMessage}
                             </Text>
                         </View>
-                    )}
-                </View>
-            </LinearGradient>
-        </TouchableOpacity>
-    );
+
+                        {/* Unread Badge */}
+                        {item.unreadCount > 0 && (
+                            <View className="bg-yellow-400 rounded-full min-w-[20px] h-5 items-center justify-center ml-2 shadow-md shadow-yellow-400/40">
+                                <Text className="text-black text-xs font-bold">
+                                    {item.unreadCount > 99 ? "99+" : item.unreadCount}
+                                </Text>
+                            </View>
+                        )}
+                    </View>
+                </LinearGradient>
+            </TouchableOpacity>
+        );
+    };
 
     return (
         <SafeAreaView className="flex-1 bg-black">
@@ -300,16 +386,13 @@ const AllChatsPage: React.FC = () => {
                     )}
                 />
                 {/* Floating Action Button */}
-                <TouchableOpacity
+                <GlassButton
                     onPress={navigateToCreateChat}
-                    activeOpacity={0.8}
-                    className="absolute bottom-12 right-6"
-                >
-                    {/* Glassy circular button */}
-                    <View className="w-16 h-16 rounded-full items-center justify-center bg-white/10 border border-cyan-400/40 backdrop-blur-md">
-                        <Ionicons name="add" size={30} color="#00f6ff" />
-                    </View>
-                </TouchableOpacity>
+                    size="lg"
+                    icon={<Ionicons name="add" size={28} color="white" />}
+                    title=""
+                    position="absolute bottom-12 right-6"
+                />
 
                 {/* Bottom Status Bar */}
                 <View className="absolute bottom-0 left-0 right-0 bg-gray-900/30 backdrop-blur-md border-t border-cyan-500/20">
