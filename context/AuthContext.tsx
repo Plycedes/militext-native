@@ -64,7 +64,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
                 setUser(_user);
                 setToken(_token);
             } else {
-                // router.replace("/sign-in");
+                router.replace("/sign-in");
             }
         })();
         setIsLoading(false);

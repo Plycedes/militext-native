@@ -1,4 +1,4 @@
-import { GlassButton } from "@/components";
+import { GlassButton, InputField } from "@/components";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
@@ -9,7 +9,6 @@ import {
     ScrollView,
     StatusBar,
     Text,
-    TextInput,
     TouchableOpacity,
     View,
 } from "react-native";
@@ -17,6 +16,7 @@ import {
 interface FormData {
     email: string;
     username: string;
+    number: string;
     password: string;
     confirmPassword: string;
 }
@@ -25,6 +25,7 @@ const SignUpPage: React.FC = () => {
     const [formData, setFormData] = useState<FormData>({
         email: "",
         username: "",
+        number: "",
         password: "",
         confirmPassword: "",
     });
@@ -32,7 +33,7 @@ const SignUpPage: React.FC = () => {
     const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
-    const handleInputChange = (field: keyof FormData, value: string): void => {
+    const handleInputChange = (field: string, value: string): void => {
         setFormData((prev) => ({ ...prev, [field]: value }));
     };
 
@@ -40,6 +41,7 @@ const SignUpPage: React.FC = () => {
         if (
             !formData.email ||
             !formData.username ||
+            !formData.number ||
             !formData.password ||
             !formData.confirmPassword
         ) {
@@ -56,8 +58,9 @@ const SignUpPage: React.FC = () => {
         // Add your sign-up logic here
         setTimeout(() => {
             setIsLoading(false);
+            console.log(formData);
             Alert.alert("Success", "Account created successfully!");
-        }, 2000);
+        }, 1000);
     };
 
     const navigateToSignIn = (): void => {
@@ -100,117 +103,75 @@ const SignUpPage: React.FC = () => {
                     {/* Form Container */}
                     <View className="bg-gray-900/40 rounded-2xl p-6 border border-cyan-500/20 backdrop-blur-sm shadow-2xl shadow-cyan-500/10">
                         {/* Email Input */}
-                        <View className="mb-4">
-                            <Text className="text-cyan-300 text-sm font-medium mb-2">
-                                Email Address
-                            </Text>
-                            <View className="bg-gray-800/50 rounded-xl border border-gray-700/50 flex-row items-center px-4 py-3 shadow-inner">
-                                <Ionicons name="mail-outline" size={20} color="#00d4ff" />
-                                <TextInput
-                                    className="flex-1 ml-3 text-white text-base"
-                                    placeholder="neural@grid.com"
-                                    placeholderTextColor="#64748b"
-                                    value={formData.email}
-                                    onChangeText={(value) => handleInputChange("email", value)}
-                                    keyboardType="email-address"
-                                    autoCapitalize="none"
-                                    autoComplete="email"
-                                />
-                            </View>
-                        </View>
+                        <InputField
+                            title="Email Address"
+                            icon="mail-outline"
+                            keyId="email"
+                            value={formData.email}
+                            placeholder="neural@grid.com"
+                            keyboardType="email-address"
+                            autoComplete="email"
+                            secured={false}
+                            bottomMargin="mb-4"
+                            handleInputChange={handleInputChange}
+                        />
 
                         {/* Username Input */}
-                        <View className="mb-4">
-                            <Text className="text-cyan-300 text-sm font-medium mb-2">Username</Text>
-                            <View className="bg-gray-800/50 rounded-xl border border-gray-700/50 flex-row items-center px-4 py-3 shadow-inner">
-                                <Ionicons name="person-outline" size={20} color="#00d4ff" />
-                                <TextInput
-                                    className="flex-1 ml-3 text-white text-base"
-                                    placeholder="cypher_user"
-                                    placeholderTextColor="#64748b"
-                                    value={formData.username}
-                                    onChangeText={(value) => handleInputChange("username", value)}
-                                    autoCapitalize="none"
-                                    autoComplete="username"
-                                />
-                            </View>
-                        </View>
+                        <InputField
+                            title="Username"
+                            icon="person-outline"
+                            keyId="username"
+                            value={formData.username}
+                            placeholder="netrunner69"
+                            keyboardType="default"
+                            autoComplete="username"
+                            secured={false}
+                            bottomMargin="mb-4"
+                            handleInputChange={handleInputChange}
+                        />
+
+                        <InputField
+                            title="Number"
+                            icon="phone-portrait-outline"
+                            keyId="number"
+                            value={formData.number}
+                            placeholder="000000000"
+                            keyboardType="number-pad"
+                            autoComplete="tel"
+                            secured={false}
+                            bottomMargin="mb-4"
+                            handleInputChange={handleInputChange}
+                        />
 
                         {/* Password Input */}
-                        <View className="mb-4">
-                            <Text className="text-cyan-300 text-sm font-medium mb-2">Password</Text>
-                            <View className="bg-gray-800/50 rounded-xl border border-gray-700/50 flex-row items-center px-4 py-3 shadow-inner">
-                                <Ionicons name="lock-closed-outline" size={20} color="#00d4ff" />
-                                <TextInput
-                                    className="flex-1 ml-3 text-white text-base"
-                                    placeholder="Enter secure passkey"
-                                    placeholderTextColor="#64748b"
-                                    value={formData.password}
-                                    onChangeText={(value) => handleInputChange("password", value)}
-                                    secureTextEntry={!showPassword}
-                                    autoComplete="password"
-                                />
-                                <TouchableOpacity
-                                    onPress={() => setShowPassword(!showPassword)}
-                                    className="ml-2 p-1"
-                                >
-                                    <Ionicons
-                                        name={showPassword ? "eye-off-outline" : "eye-outline"}
-                                        size={20}
-                                        color="#64748b"
-                                    />
-                                </TouchableOpacity>
-                            </View>
-                        </View>
+                        <InputField
+                            title="Security Key"
+                            icon="lock-closed-outline"
+                            keyId="password"
+                            value={formData.password}
+                            placeholder="Enter your passkey"
+                            keyboardType="default"
+                            autoComplete="password"
+                            secured={true}
+                            bottomMargin="mb-6"
+                            handleInputChange={handleInputChange}
+                        />
 
                         {/* Confirm Password Input */}
-                        <View className="mb-6">
-                            <Text className="text-cyan-300 text-sm font-medium mb-2">
-                                Confirm Password
-                            </Text>
-                            <View className="bg-gray-800/50 rounded-xl border border-gray-700/50 flex-row items-center px-4 py-3 shadow-inner">
-                                <Ionicons name="lock-closed-outline" size={20} color="#00d4ff" />
-                                <TextInput
-                                    className="flex-1 ml-3 text-white text-base"
-                                    placeholder="Confirm passkey"
-                                    placeholderTextColor="#64748b"
-                                    value={formData.confirmPassword}
-                                    onChangeText={(value) =>
-                                        handleInputChange("confirmPassword", value)
-                                    }
-                                    secureTextEntry={!showConfirmPassword}
-                                    autoComplete="password"
-                                />
-                                <TouchableOpacity
-                                    onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-                                    className="ml-2 p-1"
-                                >
-                                    <Ionicons
-                                        name={
-                                            showConfirmPassword ? "eye-off-outline" : "eye-outline"
-                                        }
-                                        size={20}
-                                        color="#64748b"
-                                    />
-                                </TouchableOpacity>
-                            </View>
-                        </View>
+                        <InputField
+                            title="Confirm Security Key"
+                            icon="lock-closed-outline"
+                            keyId="confirmPassword"
+                            value={formData.confirmPassword}
+                            placeholder="Confirm passkey"
+                            keyboardType="default"
+                            autoComplete="password"
+                            secured={true}
+                            bottomMargin="mb-6"
+                            handleInputChange={handleInputChange}
+                        />
 
                         {/* Sign Up Button */}
-                        {/* <TouchableOpacity
-                            className="mb-4"
-                            onPress={handleSignUp}
-                            disabled={isLoading}
-                        >
-                            <LinearGradient
-                                colors={["#00d4ff", "#0ea5e9", "#3b82f6"]}
-                                className="rounded-xl py-4 px-6 shadow-lg shadow-cyan-500/30"
-                            >
-                                <Text className="text-white text-center font-bold text-lg">
-                                    {isLoading ? "Initializing..." : "Initialize Connection"}
-                                </Text>
-                            </LinearGradient>
-                        </TouchableOpacity> */}
                         <GlassButton
                             title="Initialize Connection"
                             onPress={handleSignUp}

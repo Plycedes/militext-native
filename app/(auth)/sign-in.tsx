@@ -1,4 +1,4 @@
-import { GlassButton } from "@/components";
+import { GlassButton, InputField } from "@/components";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
@@ -9,7 +9,6 @@ import {
     ScrollView,
     StatusBar,
     Text,
-    TextInput,
     TouchableOpacity,
     Vibration,
     View,
@@ -29,7 +28,7 @@ const SignInPage: React.FC = () => {
     const [rememberMe, setRememberMe] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
-    const handleInputChange = (field: keyof LoginData, value: string): void => {
+    const handleInputChange = (field: string, value: string): void => {
         setFormData((prev) => ({ ...prev, [field]: value }));
     };
 
@@ -45,7 +44,8 @@ const SignInPage: React.FC = () => {
         setTimeout(() => {
             setIsLoading(false);
             Alert.alert("Success", "Connected to the Grid!");
-        }, 2000);
+            console.log(formData);
+        }, 1000);
     };
 
     const handleBiometricLogin = (): void => {
@@ -107,59 +107,32 @@ const SignInPage: React.FC = () => {
                     {/* Form Container */}
                     <View className="bg-gray-900/40 rounded-2xl p-6 border border-cyan-500/20 backdrop-blur-sm shadow-2xl shadow-cyan-500/10">
                         {/* Email Input */}
-                        <View className="mb-5">
-                            <Text className="text-cyan-300 text-sm font-medium mb-2">
-                                Access ID
-                            </Text>
-                            <View className="bg-gray-800/50 rounded-xl border border-gray-700/50 flex-row items-center px-4 py-4 shadow-inner">
-                                <Ionicons name="mail-outline" size={22} color="#00d4ff" />
-                                <TextInput
-                                    className="flex-1 ml-3 text-white text-base"
-                                    placeholder="neural@grid.com"
-                                    placeholderTextColor="#64748b"
-                                    value={formData.email}
-                                    onChangeText={(value) => handleInputChange("email", value)}
-                                    keyboardType="email-address"
-                                    autoCapitalize="none"
-                                    autoComplete="email"
-                                />
-                                {formData.email.length > 0 && (
-                                    <View className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse" />
-                                )}
-                            </View>
-                        </View>
+                        <InputField
+                            title="Access ID"
+                            icon="mail-outline"
+                            keyId="email"
+                            value={formData.email}
+                            placeholder="neural@grid.com"
+                            keyboardType="email-address"
+                            autoComplete="email"
+                            secured={false}
+                            bottomMargin="mb-5"
+                            handleInputChange={handleInputChange}
+                        />
 
                         {/* Password Input */}
-                        <View className="mb-6">
-                            <Text className="text-cyan-300 text-sm font-medium mb-2">
-                                Security Key
-                            </Text>
-                            <View className="bg-gray-800/50 rounded-xl border border-gray-700/50 flex-row items-center px-4 py-4 shadow-inner">
-                                <Ionicons name="lock-closed-outline" size={22} color="#00d4ff" />
-                                <TextInput
-                                    className="flex-1 ml-3 text-white text-base"
-                                    placeholder="Enter your passkey"
-                                    placeholderTextColor="#64748b"
-                                    value={formData.password}
-                                    onChangeText={(value) => handleInputChange("password", value)}
-                                    secureTextEntry={!showPassword}
-                                    autoComplete="password"
-                                />
-                                <TouchableOpacity
-                                    onPress={() => setShowPassword(!showPassword)}
-                                    className="ml-2 p-1"
-                                >
-                                    <Ionicons
-                                        name={showPassword ? "eye-off-outline" : "eye-outline"}
-                                        size={22}
-                                        color="#64748b"
-                                    />
-                                </TouchableOpacity>
-                                {formData.password.length > 0 && (
-                                    <View className="w-2 h-2 bg-green-400 rounded-full ml-2" />
-                                )}
-                            </View>
-                        </View>
+                        <InputField
+                            title="Security Key"
+                            icon="lock-closed-outline"
+                            keyId="password"
+                            value={formData.password}
+                            placeholder="Enter your passkey"
+                            keyboardType="default"
+                            autoComplete="password"
+                            secured={true}
+                            bottomMargin="mb-6"
+                            handleInputChange={handleInputChange}
+                        />
 
                         {/* Remember Me & Forgot Password */}
                         <View className="flex-row justify-between items-center mb-8">

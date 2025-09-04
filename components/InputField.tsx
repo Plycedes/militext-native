@@ -4,30 +4,32 @@ import { KeyboardTypeOptions, Text, TextInput, TouchableOpacity, View } from "re
 
 interface InputFieldTypes {
     title: string;
-    icon: "lock-closed-outline" | "person-outline";
-    key: string;
+    icon: "lock-closed-outline" | "person-outline" | "mail-outline" | "phone-portrait-outline";
+    keyId: string;
     value: string;
     placeholder: string;
     keyboardType: KeyboardTypeOptions;
-    autoComplete: "password" | "email" | "username";
+    autoComplete: "password" | "email" | "username" | "tel";
     secured: boolean;
+    bottomMargin: string;
     handleInputChange: (key: string, value: string) => void;
 }
 
 const InputField: React.FC<InputFieldTypes> = ({
     title,
     icon,
-    key,
+    keyId,
     value,
     placeholder,
     keyboardType,
     autoComplete,
     secured,
+    bottomMargin,
     handleInputChange,
 }) => {
     const [showValue, setShowValue] = useState<boolean>(false);
     return (
-        <View className="mb-4">
+        <View className={bottomMargin}>
             <Text className="text-cyan-300 text-sm font-medium mb-2">{title}</Text>
             <View className="bg-gray-800/50 rounded-xl border border-gray-700/50 flex-row items-center px-4 py-3 shadow-inner">
                 <Ionicons name={icon} size={20} color="#00d4ff" />
@@ -36,10 +38,11 @@ const InputField: React.FC<InputFieldTypes> = ({
                     placeholder={placeholder}
                     placeholderTextColor="#64748b"
                     value={value}
-                    onChangeText={(value) => handleInputChange(key, value)}
+                    onChangeText={(value) => handleInputChange(keyId, value)}
                     secureTextEntry={!showValue}
                     keyboardType={keyboardType}
                     autoComplete={autoComplete}
+                    autoCapitalize="none"
                 />
                 {secured && (
                     <TouchableOpacity onPress={() => setShowValue(!showValue)} className="ml-2 p-1">
