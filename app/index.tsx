@@ -120,7 +120,7 @@ const AllChatsPage: React.FC = () => {
 
     const navigateToChat = (chatId: string): void => {
         console.log(`Navigate to chat: ${chatId}`);
-        // router.push(`/chat/${chatId}`);
+        router.push(`/${chatId}`);
     };
 
     // const renderChatItem = ({ item }: { item: Chat }): JSX.Element => (
