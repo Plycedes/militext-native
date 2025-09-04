@@ -24,7 +24,6 @@ const SignInPage: React.FC = () => {
         email: "",
         password: "",
     });
-    const [showPassword, setShowPassword] = useState<boolean>(false);
     const [rememberMe, setRememberMe] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
 

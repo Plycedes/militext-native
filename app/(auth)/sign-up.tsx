@@ -29,8 +29,6 @@ const SignUpPage: React.FC = () => {
         password: "",
         confirmPassword: "",
     });
-    const [showPassword, setShowPassword] = useState<boolean>(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
     const handleInputChange = (field: string, value: string): void => {
