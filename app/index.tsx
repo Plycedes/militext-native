@@ -53,7 +53,7 @@ const AllChatsPage: React.FC = () => {
             id: "profile",
             label: "Profile Matrix",
             icon: "person-outline",
-            action: () => console.log("Profile opened"),
+            action: () => router.push("/profile"),
         },
         {
             id: "settings",

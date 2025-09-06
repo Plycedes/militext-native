@@ -1,4 +1,5 @@
+import ConfirmDialog from "./DialogBox";
 import GlassButton from "./GlassButton";
 import InputField from "./InputField";
 
-export { GlassButton, InputField };
+export { ConfirmDialog, GlassButton, InputField };

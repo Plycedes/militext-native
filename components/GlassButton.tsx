@@ -39,10 +39,26 @@ const GlassButton: React.FC<GlassButtonProps> = ({
             >
                 {isLoading ? (
                     <ActivityIndicator size="small" color="#22d3ee" />
-                ) : icon ? (
-                    icon
                 ) : (
-                    <Text className="text-cyan-300 text-center font-semibold text-lg">{title}</Text>
+                    <View className="flex flex-row gap-2 items-center justify-center">
+                        {icon && title ? (
+                            // Both icon + title
+                            <>
+                                <Text>{icon}</Text>
+                                <Text className="text-cyan-300 text-center font-psemibold text-lg">
+                                    {title}
+                                </Text>
+                            </>
+                        ) : icon ? (
+                            // Only icon
+                            <Text>{icon}</Text>
+                        ) : title ? (
+                            // Only title
+                            <Text className="text-cyan-300 text-center font-psemibold text-lg">
+                                {title}
+                            </Text>
+                        ) : null}
+                    </View>
                 )}
             </View>
         </TouchableOpacity>
