@@ -1,8 +1,11 @@
 import { GlassButton } from "@/components";
+import { useAuth } from "@/context/AuthContext";
+import { useSocket } from "@/context/SocketContext";
 import useAxios from "@/hooks/useAxios";
 import { DropdownOption } from "@/types/misc";
 import { Chat } from "@/types/responseTypes";
 import { getUserChats } from "@/utils/apiMethods";
+import { ChatEventEnum } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
@@ -23,7 +26,7 @@ import {
 const { width } = Dimensions.get("window");
 
 const AllChatsPage: React.FC = () => {
-    const { data } = useAxios<Chat[]>(getUserChats);
+    const { data, refetch } = useAxios<Chat[]>(getUserChats);
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
     const [isSearchVisible, setIsSearchVisible] = useState<boolean>(false);
@@ -31,6 +34,9 @@ const AllChatsPage: React.FC = () => {
 
     const dropdownHeight = useRef(new Animated.Value(0)).current;
     const searchOpacity = useRef(new Animated.Value(0)).current;
+
+    const { socket } = useSocket();
+    const { user } = useAuth();
 
     const [chats, setChats] = useState<Chat[]>([]);
 
@@ -77,10 +83,20 @@ const AllChatsPage: React.FC = () => {
 
     useEffect(() => {
         if (data) {
-            console.log(data);
+            //console.log(data);
             setChats(data);
         }
+        if (!socket) return;
+        socket.onAny((event, ...args) => {
+            console.log("[SOCKET EVENT]", event, args);
+        });
+        socket.on(ChatEventEnum.NEW_MESSAGE_EVENT, onNewMessage);
     }, [data]);
+
+    const onNewMessage = async () => {
+        console.log("New Message");
+        await refetch();
+    };
 
     const toggleDropdown = (): void => {
         const toValue = isDropdownOpen ? 0 : dropdownOptions.length * 50;
@@ -174,7 +190,9 @@ const AllChatsPage: React.FC = () => {
                                     <Text className="text-white font-semibold text-base">
                                         {item.isGroupChat
                                             ? item.name
-                                            : item.participants[0].username}
+                                            : item.participants[0].username === user?.username
+                                              ? item.participants[1].username
+                                              : item.participants[0].username}
                                     </Text>
                                     {item.isGroupChat && (
                                         <View

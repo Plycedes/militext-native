@@ -8,7 +8,7 @@ interface SocketContextType {
 }
 
 const getSocket = async () => {
-    const token = LocalStorageAsync.get("access");
+    const token = await LocalStorageAsync.get("access");
 
     return socketio(BASE_SOCKET_URL, {
         withCredentials: true,
@@ -27,7 +27,6 @@ const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) =
         (async () => {
             const sc = await getSocket();
             setSocket(sc);
-            console.log("SocketConnected", sc.active);
         })();
     }, []);
 
