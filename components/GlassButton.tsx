@@ -9,6 +9,9 @@ type GlassButtonProps = {
     size?: "sm" | "md" | "lg"; // for flexibility (like Add FAB vs normal buttons)
     icon?: React.ReactNode; // for Ionicons or others
     position?: string;
+    borderColor?: string;
+    textColor?: string;
+    bgColor?: string;
 };
 
 const GlassButton: React.FC<GlassButtonProps> = ({
@@ -19,6 +22,9 @@ const GlassButton: React.FC<GlassButtonProps> = ({
     size = "md",
     icon,
     position,
+    borderColor = "cyan-400/30",
+    textColor = "cyan-400",
+    bgColor = "cyan-400/10",
 }) => {
     const sizeClasses =
         size === "sm"
@@ -35,7 +41,7 @@ const GlassButton: React.FC<GlassButtonProps> = ({
             className={position ? position : "mb-4"}
         >
             <View
-                className={`bg-white/10 border border-cyan-400/30 backdrop-blur-md ${sizeClasses}`}
+                className={`bg-${bgColor} border border-${borderColor} backdrop-blur-md ${sizeClasses}`}
             >
                 {isLoading ? (
                     <ActivityIndicator size="small" color="#22d3ee" />
@@ -44,17 +50,21 @@ const GlassButton: React.FC<GlassButtonProps> = ({
                         {icon && title ? (
                             // Both icon + title
                             <>
-                                <Text>{icon}</Text>
-                                <Text className="text-cyan-300 text-center font-psemibold text-lg">
+                                <View>{icon}</View>
+                                <Text
+                                    className={`text-${textColor} text-center font-psemibold text-lg`}
+                                >
                                     {title}
                                 </Text>
                             </>
                         ) : icon ? (
                             // Only icon
-                            <Text>{icon}</Text>
+                            <View>{icon}</View>
                         ) : title ? (
                             // Only title
-                            <Text className="text-cyan-300 text-center font-psemibold text-lg">
+                            <Text
+                                className={`text-${textColor} text-center font-psemibold text-lg`}
+                            >
                                 {title}
                             </Text>
                         ) : null}

@@ -172,24 +172,24 @@ const SignInPage: React.FC = () => {
                         />
 
                         {/* Quick Access */}
-                        <TouchableOpacity className="mb-6 bg-gray-800/30 rounded-xl py-3 px-4 border border-gray-700/30">
+                        {/* <TouchableOpacity className="mb-6 bg-gray-800/30 rounded-xl py-3 px-4 border border-gray-700/30">
                             <View className="flex-row items-center justify-center">
                                 <Ionicons name="flash-outline" size={18} color="#fbbf24" />
                                 <Text className="ml-2 text-yellow-400 font-medium text-sm">
                                     Quick Neural Sync
                                 </Text>
                             </View>
-                        </TouchableOpacity>
+                        </TouchableOpacity> */}
 
                         {/* Divider */}
-                        <View className="flex-row items-center my-6">
+                        {/* <View className="flex-row items-center my-6">
                             <View className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-700/50 to-transparent" />
                             <Text className="mx-4 text-gray-400 text-sm">alternative access</Text>
                             <View className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-700/50 to-transparent" />
-                        </View>
+                        </View> */}
 
                         {/* Alternative Access Methods */}
-                        <View className="space-y-3 mb-4">
+                        {/* <View className="space-y-3 mb-4">
                             <TouchableOpacity
                                 className="bg-gray-800/50 rounded-xl py-3 px-4 border border-gray-700/50 flex-row items-center justify-center shadow-inner"
                                 onPress={handleBiometricLogin}
@@ -211,17 +211,17 @@ const SignInPage: React.FC = () => {
                                     <Ionicons name="camera-outline" size={16} color="#64748b" />
                                 </View>
                             </TouchableOpacity>
-                        </View>
+                        </View> */}
 
                         {/* Emergency Access */}
-                        <TouchableOpacity className="bg-red-900/20 border border-red-500/30 rounded-xl py-2 px-4">
+                        {/* <TouchableOpacity className="bg-red-900/20 border border-red-500/30 rounded-xl py-2 px-4">
                             <View className="flex-row items-center justify-center">
                                 <Ionicons name="warning-outline" size={16} color="#ef4444" />
                                 <Text className="ml-2 text-red-400 font-medium text-xs">
                                     Emergency Override
                                 </Text>
                             </View>
-                        </TouchableOpacity>
+                        </TouchableOpacity> */}
                     </View>
 
                     {/* Sign Up Link */}

@@ -11,7 +11,7 @@ const ProfilePage: React.FC = () => {
     const fadeAnim = React.useRef(new Animated.Value(0)).current;
     const pulseAnim = React.useRef(new Animated.Value(1)).current;
 
-    const { logout } = useAuth();
+    const { logout, user } = useAuth();
 
     React.useEffect(() => {
         // fade-in page
@@ -58,7 +58,7 @@ const ProfilePage: React.FC = () => {
         <SafeAreaView className="flex-1 bg-black">
             <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
             <LinearGradient
-                colors={["#0a0a0a", "#1a0a2e", "#16213e", "#0f3460"]}
+                colors={["#0a0a0a", "#1a0a2e", "#16213e", "#0a203bff"]}
                 className="flex-1"
             >
                 <Animated.ScrollView
@@ -68,19 +68,18 @@ const ProfilePage: React.FC = () => {
                 >
                     {/* Avatar Section */}
                     <View className="items-center mt-12 mb-8">
-                        <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
-                            <LinearGradient
-                                colors={["#00d4ff", "#0ea5e9", "#3b82f6"]}
-                                className="p-[3px] rounded-full"
-                            >
-                                <Image
-                                    source={{ uri: "https://i.pravatar.cc/300" }}
-                                    className="w-36 h-36 rounded-full"
-                                />
-                            </LinearGradient>
-                        </Animated.View>
+                        {/* Pulsing Glow Ring */}
+
+                        <View className="w-40 h-40 rounded-full items-center justify-center shadow-lg shadow-cyan-400/80 overflow-hidden">
+                            <Image
+                                source={{ uri: `${user?.avatar}` }}
+                                className="w-36 h-36 rounded-full border-2 border-cyan-400/30 backdrop-blur-md"
+                            />
+                        </View>
+
+                        {/* Username */}
                         <Text className="text-white text-3xl font-extrabold mt-6">
-                            Cyber Wanderer
+                            {user?.username}
                         </Text>
                         <Text className="text-cyan-300/80 text-sm mt-1">Connected to the Grid</Text>
                     </View>
@@ -117,13 +116,26 @@ const ProfilePage: React.FC = () => {
                         </View>
                     </LinearGradient>
 
+                    {/* Edit button */}
+                    <View className="mt-8">
+                        <GlassButton
+                            title="Edit Profile"
+                            onPress={() => console.log("Edit")}
+                            isLoading={false}
+                            icon={<Ionicons name="clipboard-outline" size={18} color="#fbbf24" />}
+                            borderColor="yellow-400/30"
+                            textColor="yellow-400"
+                            bgColor="yellow-400/10"
+                        />
+                    </View>
+
                     {/* Logout Button */}
-                    <View className="mt-16">
+                    <View className="">
                         <GlassButton
                             title="Log Out"
                             onPress={handleLogoutClick}
                             isLoading={false}
-                            icon={<Ionicons name="power-outline" size={20} color="white" />}
+                            icon={<Ionicons name="power-outline" size={20} color="#52cbf7ff" />}
                         />
                     </View>
                 </Animated.ScrollView>

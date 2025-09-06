@@ -138,9 +138,7 @@ const AllChatsPage: React.FC = () => {
                             : ["rgba(0,212,255,0.05)", "rgba(14,165,233,0.08)"] // Cyan glossy
                     }
                     className={`rounded-2xl p-4 backdrop-blur-md ${
-                        isUnread
-                            ? "border border-yellow-400/40 shadow-lg shadow-yellow-400/20"
-                            : "border border-cyan-500/30"
+                        isUnread ? "border border-yellow-400/40" : "border border-cyan-500/30"
                     }`}
                 >
                     <View className="flex-row items-center">
