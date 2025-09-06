@@ -2,24 +2,21 @@ import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { Alert } from "react-native";
 
-const useAxios = (fn: () => any, page = 1, limit = 5) => {
-    const [data, setData] = useState([]);
+type AsyncFn<T> = () => Promise<any>; // fn returns AxiosResponse or something similar
+
+function useAxios<T>(fn: AsyncFn<T>, page = 1, limit = 5) {
+    const [data, setData] = useState<T | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     const fetchData = async () => {
         setIsLoading(true);
         try {
             const response = await fn();
-            //console.log(response.data);
-            if (response.data.data.data) {
-                setData(response.data.data.data);
-            } else {
-                //console.log(response.data.data);
-                setData(response.data.data);
-            }
+            const innerData = response?.data?.data?.data ?? response?.data?.data ?? response?.data;
+            setData(innerData as T);
         } catch (error: any) {
-            Alert.alert(error || "Something went wrong");
-            if (error.response.status === 401 || error.response.status === 403) {
+            Alert.alert(error?.message || "Something went wrong");
+            if (error?.response?.status === 401 || error?.response?.status === 403) {
                 router.replace("/sign-in");
             }
         } finally {
@@ -29,11 +26,12 @@ const useAxios = (fn: () => any, page = 1, limit = 5) => {
 
     useEffect(() => {
         fetchData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const refetch = () => fetchData();
 
     return { data, isLoading, refetch };
-};
+}
 
 export default useAxios;

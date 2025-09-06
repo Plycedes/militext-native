@@ -1,5 +1,9 @@
 import { ConfirmDialog, GlassButton } from "@/components";
 import { useAuth } from "@/context/AuthContext";
+import useAxios from "@/hooks/useAxios";
+import { UserInterface } from "@/types/misc";
+import { getCurrentUser } from "@/utils/apiMethods";
+import { reactlogo } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useState } from "react";
@@ -11,7 +15,8 @@ const ProfilePage: React.FC = () => {
     const fadeAnim = React.useRef(new Animated.Value(0)).current;
     const pulseAnim = React.useRef(new Animated.Value(1)).current;
 
-    const { logout, user } = useAuth();
+    const { data: user } = useAxios<UserInterface>(getCurrentUser);
+    const { logout } = useAuth();
 
     React.useEffect(() => {
         // fade-in page
@@ -72,7 +77,7 @@ const ProfilePage: React.FC = () => {
 
                         <View className="w-40 h-40 rounded-full items-center justify-center shadow-lg shadow-cyan-400/80 overflow-hidden">
                             <Image
-                                source={{ uri: `${user?.avatar}` }}
+                                source={user?.avatar ? { uri: user.avatar } : reactlogo}
                                 className="w-36 h-36 rounded-full border-2 border-cyan-400/30 backdrop-blur-md"
                             />
                         </View>

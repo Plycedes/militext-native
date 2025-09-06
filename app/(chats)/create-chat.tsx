@@ -110,15 +110,12 @@ const CreateChatPage: React.FC = () => {
             Vibration.vibrate(100);
             return;
         }
-        setIsLoading(true);
-        setTimeout(() => {
+        try {
+        } catch (error) {
+            console.log(error);
+        } finally {
             setIsLoading(false);
-            Alert.alert(
-                "Success",
-                `${chatMode === "individual" ? "Direct neural link" : "Neural collective"} established!`,
-                [{ text: "Continue", onPress: () => router.back() }]
-            );
-        }, 2000);
+        }
     };
 
     const handleScanQR = (id: string): void => {

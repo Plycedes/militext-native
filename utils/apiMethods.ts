@@ -12,6 +12,10 @@ const logoutUser = () => {
     return apiClient.post("/users/logout");
 };
 
+const getCurrentUser = () => {
+    return apiClient.get("/users/current-user");
+};
+
 const getAvailableUsers = () => {
     return apiClient.get("/chats/users");
 };
@@ -80,6 +84,7 @@ export {
     deleteOneOnOneChat,
     getAvailableUsers,
     getChatMessages,
+    getCurrentUser,
     getGroupInfo,
     getUserChats,
     loginUser,
