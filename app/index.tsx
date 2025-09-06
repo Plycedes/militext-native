@@ -6,7 +6,7 @@ import { mockChats } from "@/utils/mockdata";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import React, { JSX, useRef, useState } from "react";
+import React, { JSX, useEffect, useRef, useState } from "react";
 import {
     Animated,
     Dimensions,
@@ -74,6 +74,10 @@ const AllChatsPage: React.FC = () => {
             action: () => console.log("Security settings"),
         },
     ];
+
+    useEffect(() => {
+        if (data) console.log(data);
+    }, [data]);
 
     const toggleDropdown = (): void => {
         const toValue = isDropdownOpen ? 0 : dropdownOptions.length * 50;
