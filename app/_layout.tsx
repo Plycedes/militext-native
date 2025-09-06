@@ -1,4 +1,5 @@
 import { AuthProvider } from "@/context/AuthContext";
+import { SocketProvider } from "@/context/SocketContext";
 import { useFonts } from "expo-font";
 import { SplashScreen, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -30,13 +31,15 @@ export default function RootLayout() {
     return (
         <>
             <AuthProvider>
-                <Stack>
-                    <Stack.Screen name="index" options={{ headerShown: false }} />
-                    <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-                    <Stack.Screen name="(chats)" options={{ headerShown: false }} />
-                    <Stack.Screen name="(user)" options={{ headerShown: false }} />
-                </Stack>
-                <StatusBar style="dark" />
+                <SocketProvider>
+                    <Stack>
+                        <Stack.Screen name="index" options={{ headerShown: false }} />
+                        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                        <Stack.Screen name="(chats)" options={{ headerShown: false }} />
+                        <Stack.Screen name="(user)" options={{ headerShown: false }} />
+                    </Stack>
+                    <StatusBar style="dark" />
+                </SocketProvider>
             </AuthProvider>
         </>
     );

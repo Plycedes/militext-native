@@ -1,8 +1,8 @@
 import { GlassButton } from "@/components";
 import useAxios from "@/hooks/useAxios";
-import { Chat, DropdownOption } from "@/types/misc";
+import { DropdownOption } from "@/types/misc";
+import { Chat } from "@/types/responseTypes";
 import { getUserChats } from "@/utils/apiMethods";
-import { mockChats } from "@/utils/mockdata";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
@@ -23,7 +23,7 @@ import {
 const { width } = Dimensions.get("window");
 
 const AllChatsPage: React.FC = () => {
-    const { data } = useAxios(getUserChats);
+    const { data } = useAxios<Chat[]>(getUserChats);
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
     const [isSearchVisible, setIsSearchVisible] = useState<boolean>(false);
@@ -32,7 +32,7 @@ const AllChatsPage: React.FC = () => {
     const dropdownHeight = useRef(new Animated.Value(0)).current;
     const searchOpacity = useRef(new Animated.Value(0)).current;
 
-    const [chats] = useState<Chat[]>(mockChats);
+    const [chats, setChats] = useState<Chat[]>([]);
 
     const dropdownOptions: DropdownOption[] = [
         {
@@ -76,7 +76,10 @@ const AllChatsPage: React.FC = () => {
     ];
 
     useEffect(() => {
-        if (data) console.log(data);
+        if (data) {
+            console.log(data);
+            setChats(data);
+        }
     }, [data]);
 
     const toggleDropdown = (): void => {
@@ -114,10 +117,10 @@ const AllChatsPage: React.FC = () => {
     const filteredChats = chats.filter((chat) => {
         const matchesSearch =
             chat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            chat.lastMessage.toLowerCase().includes(searchQuery.toLowerCase());
+            chat.lastMessage.content.toLowerCase().includes(searchQuery.toLowerCase());
 
-        if (selectedFilter === "individual") return matchesSearch && !chat.isGroup;
-        if (selectedFilter === "groups") return matchesSearch && chat.isGroup;
+        if (selectedFilter === "individual") return matchesSearch && !chat.isGroupChat;
+        if (selectedFilter === "groups") return matchesSearch && chat.isGroupChat;
         return matchesSearch;
     });
 
@@ -131,10 +134,10 @@ const AllChatsPage: React.FC = () => {
     };
 
     const renderChatItem = ({ item }: { item: Chat }): JSX.Element => {
-        const isUnread = item.unreadCount > 0;
+        const isUnread = item.userChat.unreadCount > 0;
 
         return (
-            <TouchableOpacity onPress={() => navigateToChat(item.id)} className="mx-4 mb-3">
+            <TouchableOpacity onPress={() => navigateToChat(item._id)} className="mx-4 mb-3">
                 <LinearGradient
                     colors={
                         isUnread
@@ -148,22 +151,18 @@ const AllChatsPage: React.FC = () => {
                     <View className="flex-row items-center">
                         <View
                             className={`w-12 h-12 rounded-full items-center justify-center border-2 ${
-                                item.isOnline
-                                    ? isUnread
-                                        ? "border-yellow-400/70 bg-yellow-400/10"
-                                        : "border-cyan-400/70 bg-cyan-400/10"
-                                    : "border-gray-600/50 bg-gray-700/10"
+                                isUnread
+                                    ? "border-yellow-400/70 bg-yellow-400/10"
+                                    : "border-cyan-400/70 bg-cyan-400/10"
                             }`}
                         >
                             <Ionicons
-                                name={item.isGroup ? "people-outline" : "person-outline"}
+                                name={item.isGroupChat ? "people-outline" : "person-outline"}
                                 size={24}
                                 color={
                                     isUnread
                                         ? "#FFD700" // Gold for unread
-                                        : item.isOnline
-                                          ? "#00f6ff"
-                                          : "#6b7280"
+                                        : "#00f6ff"
                                 }
                             />
                         </View>
@@ -173,9 +172,11 @@ const AllChatsPage: React.FC = () => {
                             <View className="flex-row items-center justify-between mb-1">
                                 <View className="flex-row items-center">
                                     <Text className="text-white font-semibold text-base">
-                                        {item.name}
+                                        {item.isGroupChat
+                                            ? item.name
+                                            : item.participants[0].username}
                                     </Text>
-                                    {item.isGroup && (
+                                    {item.isGroupChat && (
                                         <View
                                             className={`ml-2 rounded-full px-2 py-0.5 ${
                                                 isUnread ? "bg-yellow-400/20" : "bg-cyan-500/20"
@@ -186,24 +187,28 @@ const AllChatsPage: React.FC = () => {
                                                     isUnread ? "text-yellow-400" : "text-cyan-400"
                                                 }`}
                                             >
-                                                {item.participants}
+                                                {item.participants[0].username}
                                             </Text>
                                         </View>
                                     )}
                                 </View>
-                                <Text className="text-gray-400 text-xs">{item.timestamp}</Text>
+                                <Text className="text-gray-400 text-xs">
+                                    {new Date(item.updatedAt).toLocaleString()}
+                                </Text>
                             </View>
 
                             <Text className="text-gray-300 text-sm" numberOfLines={1}>
-                                {item.lastMessage}
+                                {item.lastMessage.content}
                             </Text>
                         </View>
 
                         {/* Unread Badge */}
-                        {item.unreadCount > 0 && (
+                        {item.userChat.unreadCount > 0 && (
                             <View className="bg-yellow-400 rounded-full min-w-[20px] h-5 items-center justify-center ml-2 shadow-md shadow-yellow-400/40">
                                 <Text className="text-black text-xs font-bold">
-                                    {item.unreadCount > 99 ? "99+" : item.unreadCount}
+                                    {item.userChat.unreadCount > 99
+                                        ? "99+"
+                                        : item.userChat.unreadCount}
                                 </Text>
                             </View>
                         )}
@@ -316,7 +321,7 @@ const AllChatsPage: React.FC = () => {
                 <FlatList
                     data={filteredChats}
                     renderItem={renderChatItem}
-                    keyExtractor={(item) => item.id}
+                    keyExtractor={(item) => item._id}
                     showsVerticalScrollIndicator={false}
                     contentContainerStyle={{ paddingBottom: 100 }}
                     ListEmptyComponent={() => (
