@@ -56,7 +56,7 @@ const removeParticipantFromGroup = (chatId: string, participantId: string) => {
     return apiClient.delete(`/chats/group/${chatId}/${participantId}`);
 };
 
-const getChatMessages = (chatId: string) => {
+const getChatMessages = (chatId?: string) => {
     return apiClient.get(`/messages/${chatId}`);
 };
 

@@ -1,8 +1,13 @@
 // app/chat/[id].tsx (or wherever you route it)
+import { useAuth } from "@/context/AuthContext";
+import useAxios from "@/hooks/useAxios";
+import { UserInterface } from "@/types/misc";
+import { Message, MessagesResponse } from "@/types/responseTypes";
+import { getChatMessages } from "@/utils/apiMethods";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useLocalSearchParams } from "expo-router";
-import React, { useMemo, useRef, useState } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
     Alert,
     Animated,
@@ -18,14 +23,6 @@ import {
     View,
 } from "react-native";
 
-type Message = {
-    id: string;
-    text: string;
-    timestamp: string;
-    isMe: boolean;
-    unread?: boolean;
-};
-
 type MenuOption = {
     id: string;
     label: string;
@@ -34,32 +31,12 @@ type MenuOption = {
 };
 
 const ChatPage: React.FC = () => {
-    const { chatId } = useLocalSearchParams<{ chatId: string }>();
-    const [input, setInput] = useState<string>("");
-    const [messages, setMessages] = useState<Message[]>([
-        {
-            id: "m1",
-            text: "Link established. Welcome to the grid.",
-            timestamp: "10:24",
-            isMe: false,
-        },
-        { id: "m2", text: "Reading your signal loud and clear.", timestamp: "10:25", isMe: true },
-        {
-            id: "m3",
-            text: "Patching you into the collective node.",
-            timestamp: "10:26",
-            isMe: false,
-            unread: true,
-        },
-        {
-            id: "m4",
-            text: "Send the payload when ready.",
-            timestamp: "10:27",
-            isMe: false,
-            unread: true,
-        },
-    ]);
+    const { chatId, chatName } = useLocalSearchParams<{ chatId: string; chatName: string }>();
+    const { user } = useAuth();
+    const { data } = useAxios<MessagesResponse>(getChatMessages, chatId);
 
+    const [input, setInput] = useState<string>("");
+    const [messages, setMessages] = useState<Message[]>([]);
     const [menuOpen, setMenuOpen] = useState<boolean>(false);
 
     // Animated dropdown (height + opacity for buttery open/close)
@@ -102,6 +79,13 @@ const ChatPage: React.FC = () => {
         [chatId]
     );
 
+    useEffect(() => {
+        if (data) {
+            setMessages(data.messages);
+            //console.log(data.messages);
+        }
+    }, [data, chatId]);
+
     const toggleMenu = (): void => {
         const toOpen = !menuOpen;
         setMenuOpen(toOpen);
@@ -139,13 +123,19 @@ const ChatPage: React.FC = () => {
     };
 
     const onSend = (): void => {
-        const trimmed = input.trim();
+        const trimmed: string = input.trim();
         if (!trimmed) return;
+        const sender: UserInterface = {
+            _id: user!._id,
+            username: user!.username,
+        };
         const newMsg: Message = {
-            id: `${Date.now()}`,
-            text: trimmed,
-            timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-            isMe: true,
+            _id: `${Date.now()}`,
+            content: trimmed,
+            updatedAt: `${Date.now()}`,
+            createdAt: `${Date.now()}`,
+            sender: sender,
+            chat: chatId,
         };
         setMessages((prev) => [...prev, newMsg]);
         setInput("");
@@ -161,9 +151,11 @@ const ChatPage: React.FC = () => {
 
     const renderMessage = ({ item, index }: { item: Message; index: number }) => {
         // Unread divider (first unread message)
-        const showUnreadDivider = item.unread && (index === 0 || !messages[index - 1]?.unread);
+        // const showUnreadDivider = item.unread && (index === 0 || !messages[index - 1]?.unread);
+        const showUnreadDivider = false;
 
-        const isMe = item.isMe;
+        const isMe = item.sender._id === user?._id;
+        //console.log(item.sender._id, user);
 
         return (
             <View className="px-4">
@@ -180,7 +172,7 @@ const ChatPage: React.FC = () => {
                         colors={
                             isMe
                                 ? ["rgba(0,212,255,0.08)", "rgba(14,165,233,0.12)"] // my bubble cyan glass
-                                : item.unread
+                                : false
                                   ? ["rgba(255,215,0,0.08)", "rgba(255,200,0,0.14)"] // unread yellow glass
                                   : ["rgba(148,163,184,0.08)", "rgba(71,85,105,0.12)"] // neutral slate glass
                         }
@@ -189,17 +181,17 @@ const ChatPage: React.FC = () => {
                         className={`max-w-[80%] rounded-2xl px-4 py-3 ${
                             isMe
                                 ? "border border-cyan-400/30 shadow-cyan-500/20 shadow-md"
-                                : item.unread
+                                : false
                                   ? "border border-yellow-400/40 shadow-yellow-400/20 shadow-md"
                                   : "border border-slate-400/20"
                         }`}
                     >
-                        <Text className="text-white">{item.text}</Text>
+                        <Text className="text-white">{item.content}</Text>
                         <View className={`mt-1 ${isMe ? "items-end" : "items-start"}`}>
                             <Text
-                                className={`${isMe ? "text-cyan-300/80" : item.unread ? "text-yellow-300/80" : "text-slate-300/70"} text-xxs`}
+                                className={`${isMe ? "text-cyan-300/80" : false ? "text-yellow-300/80" : "text-slate-300/70"} text-xxs`}
                             >
-                                {item.timestamp}
+                                {item.updatedAt}
                             </Text>
                         </View>
                     </LinearGradient>
@@ -222,12 +214,76 @@ const ChatPage: React.FC = () => {
                     style={{ flex: 1 }}
                 >
                     {/* Header */}
-                    <View>{/* ... header code ... */}</View>
+                    <View className="px-6 pt-10 pb-3">
+                        <View className="flex-row items-center justify-between">
+                            <View className="flex-row items-center">
+                                <TouchableOpacity
+                                    onPress={() => router.back()}
+                                    className="w-10 h-10 bg-white/10 border border-cyan-400/30 backdrop-blur-md rounded-full items-center justify-center mr-3"
+                                >
+                                    <Ionicons name="arrow-back" size={18} color="#00d4ff" />
+                                </TouchableOpacity>
+                                <View>
+                                    <Text className="text-white text-xl font-semibold">
+                                        {chatName}
+                                    </Text>
+                                    <Text className="text-cyan-300 text-xxs opacity-80">
+                                        Secure link active
+                                    </Text>
+                                </View>
+                            </View>
+
+                            {/* Menu */}
+                            <View>
+                                <TouchableOpacity
+                                    onPress={toggleMenu}
+                                    className="w-10 h-10 bg-white/10 border border-cyan-400/30 backdrop-blur-md rounded-full items-center justify-center"
+                                    activeOpacity={0.85}
+                                >
+                                    <Ionicons
+                                        name={menuOpen ? "close" : "ellipsis-vertical"}
+                                        size={18}
+                                        color="#00d4ff"
+                                    />
+                                </TouchableOpacity>
+
+                                {/* Animated Dropdown */}
+                                <Animated.View
+                                    style={{
+                                        height: dropdownH,
+                                        opacity: dropdownOpacity,
+                                        overflow: "hidden",
+                                    }}
+                                    className="absolute right-0 mt-2 w-48 bg-gray-900/60 border border-cyan-500/20 rounded-xl backdrop-blur-md"
+                                >
+                                    {menuOptions.map((opt, idx) => (
+                                        <TouchableOpacity
+                                            key={opt.id}
+                                            onPress={() => {
+                                                opt.action();
+                                                toggleMenu();
+                                            }}
+                                            className={`flex-row items-center px-3 py-3 ${idx < menuOptions.length - 1 ? "border-b border-gray-700/30" : ""}`}
+                                            activeOpacity={0.85}
+                                        >
+                                            <Ionicons name={opt.icon} size={18} color="#00d4ff" />
+                                            <Text className="ml-3 text-white text-sm">
+                                                {opt.label}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    ))}
+                                </Animated.View>
+                            </View>
+                        </View>
+
+                        {/* Neon header line */}
+                        <View className="mt-4 h-[1px] bg-cyan-500/30" />
+                    </View>
 
                     {/* Messages */}
                     <FlatList
                         data={messages}
-                        keyExtractor={(m) => m.id}
+                        keyExtractor={(m) => m._id}
                         renderItem={renderMessage}
                         showsVerticalScrollIndicator={false}
                         contentContainerStyle={{ paddingBottom: 96, paddingTop: 6 }}

@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 
 export interface UserInterface {
     _id: string;
-    avatar: string;
+    avatar?: string;
     username: string;
     email?: string;
     createdAt?: string;

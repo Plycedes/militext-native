@@ -2,16 +2,21 @@ import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { Alert } from "react-native";
 
-type AsyncFn<T> = () => Promise<any>; // fn returns AxiosResponse or something similar
+type AsyncFn<T> = (id?: string) => Promise<any>;
 
-function useAxios<T>(fn: AsyncFn<T>, page = 1, limit = 5) {
+function useAxios<T>(fn: AsyncFn<T>, id?: string, page = 1, limit = 5) {
     const [data, setData] = useState<T | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     const fetchData = async () => {
         setIsLoading(true);
         try {
-            const response = await fn();
+            let response;
+            if (id) {
+                response = await fn(id);
+            } else {
+                response = await fn();
+            }
             const innerData = response?.data?.data?.data ?? response?.data?.data ?? response?.data;
             setData(innerData as T);
         } catch (error: any) {

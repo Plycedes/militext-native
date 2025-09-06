@@ -8,7 +8,7 @@ import { getUserChats } from "@/utils/apiMethods";
 import { ChatEventEnum } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
+import { RelativePathString, router } from "expo-router";
 import React, { JSX, useEffect, useRef, useState } from "react";
 import {
     Animated,
@@ -144,16 +144,25 @@ const AllChatsPage: React.FC = () => {
         router.push("/create-chat");
     };
 
-    const navigateToChat = (chatId: string): void => {
+    const navigateToChat = (chat: Chat): void => {
+        const chatId = chat._id;
+        const name = chat.isGroupChat
+            ? chat.name
+            : chat.participants[0]._id === user?._id
+              ? chat.participants[1].username
+              : chat.participants[0].username;
         console.log(`Navigate to chat: ${chatId}`);
-        router.push(`/${chatId}`);
+        router.push({
+            pathname: `/${chatId}` as RelativePathString,
+            params: { chatName: name },
+        });
     };
 
     const renderChatItem = ({ item }: { item: Chat }): JSX.Element => {
         const isUnread = item.userChat.unreadCount > 0;
 
         return (
-            <TouchableOpacity onPress={() => navigateToChat(item._id)} className="mx-4 mb-3">
+            <TouchableOpacity onPress={() => navigateToChat(item)} className="mx-4 mb-3">
                 <LinearGradient
                     colors={
                         isUnread

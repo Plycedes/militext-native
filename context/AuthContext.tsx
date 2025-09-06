@@ -62,8 +62,9 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         (async () => {
             const _token = await LocalStorageAsync.get("access");
             const _user = await LocalStorageAsync.get("user");
+            console.log(_user);
             if (_token && _user?._id) {
-                setUser(JSON.parse(_user));
+                setUser(_user);
                 setToken(_token);
             } else {
                 router.replace("/sign-in");
