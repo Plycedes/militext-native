@@ -7,7 +7,7 @@ export class LocalStorageAsync {
             try {
                 return JSON.parse(value);
             } catch (error) {
-                return null;
+                return value;
             }
         }
         return null;

@@ -1,5 +1,7 @@
 import { GlassButton } from "@/components";
+import useAxios from "@/hooks/useAxios";
 import { Chat, DropdownOption } from "@/types/misc";
+import { getUserChats } from "@/utils/apiMethods";
 import { mockChats } from "@/utils/mockdata";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -21,6 +23,7 @@ import {
 const { width } = Dimensions.get("window");
 
 const AllChatsPage: React.FC = () => {
+    const { data } = useAxios(getUserChats);
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
     const [isSearchVisible, setIsSearchVisible] = useState<boolean>(false);
@@ -122,63 +125,6 @@ const AllChatsPage: React.FC = () => {
         console.log(`Navigate to chat: ${chatId}`);
         router.push(`/${chatId}`);
     };
-
-    // const renderChatItem = ({ item }: { item: Chat }): JSX.Element => (
-    //     <TouchableOpacity onPress={() => navigateToChat(item.id)} className="mx-4 mb-3">
-    //         <LinearGradient
-    //             colors={["rgba(0,212,255,0.05)", "rgba(14,165,233,0.08)"]}
-    //             className="rounded-2xl p-4 border border-cyan-500/30 backdrop-blur-md"
-    //         >
-    //             <View className="flex-row items-center">
-    //                 <View
-    //                     className={`w-12 h-12 rounded-full items-center justify-center border-2 ${
-    //                         item.isOnline
-    //                             ? "border-cyan-400/70 bg-cyan-400/10"
-    //                             : "border-gray-600/50 bg-gray-700/10"
-    //                     }`}
-    //                 >
-    //                     <Ionicons
-    //                         name={item.isGroup ? "people-outline" : "person-outline"}
-    //                         size={24}
-    //                         color={item.isOnline ? "#00f6ff" : "#6b7280"}
-    //                     />
-    //                 </View>
-
-    //                 {/* Chat Info */}
-    //                 <View className="flex-1 ml-4">
-    //                     <View className="flex-row items-center justify-between mb-1">
-    //                         <View className="flex-row items-center">
-    //                             <Text className="text-white font-semibold text-base">
-    //                                 {item.name}
-    //                             </Text>
-    //                             {item.isGroup && (
-    //                                 <View className="ml-2 bg-cyan-500/20 rounded-full px-2 py-0.5">
-    //                                     <Text className="text-cyan-400 text-xs">
-    //                                         {item.participants}
-    //                                     </Text>
-    //                                 </View>
-    //                             )}
-    //                         </View>
-    //                         <Text className="text-gray-400 text-xs">{item.timestamp}</Text>
-    //                     </View>
-
-    //                     <Text className="text-gray-300 text-sm" numberOfLines={1}>
-    //                         {item.lastMessage}
-    //                     </Text>
-    //                 </View>
-
-    //                 {/* Unread Badge */}
-    //                 {item.unreadCount > 0 && (
-    //                     <View className="bg-cyan-500 rounded-full min-w-[20px] h-5 items-center justify-center ml-2">
-    //                         <Text className="text-white text-xs font-bold">
-    //                             {item.unreadCount > 99 ? "99+" : item.unreadCount}
-    //                         </Text>
-    //                     </View>
-    //                 )}
-    //             </View>
-    //         </LinearGradient>
-    //     </TouchableOpacity>
-    // );
 
     const renderChatItem = ({ item }: { item: Chat }): JSX.Element => {
         const isUnread = item.unreadCount > 0;

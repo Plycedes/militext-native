@@ -1,4 +1,5 @@
 import { GlassButton, InputField } from "@/components";
+import { useAuth } from "@/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
@@ -15,36 +16,39 @@ import {
 } from "react-native";
 
 interface LoginData {
-    email: string;
+    username: string;
     password: string;
 }
 
 const SignInPage: React.FC = () => {
     const [formData, setFormData] = useState<LoginData>({
-        email: "",
+        username: "",
         password: "",
     });
     const [rememberMe, setRememberMe] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
+
+    const { login } = useAuth();
 
     const handleInputChange = (field: string, value: string): void => {
         setFormData((prev) => ({ ...prev, [field]: value }));
     };
 
     const handleSignIn = async (): Promise<void> => {
-        if (!formData.email || !formData.password) {
+        if (!formData.username || !formData.password) {
             Alert.alert("Error", "Please enter your credentials");
             Vibration.vibrate(100);
             return;
         }
 
-        setIsLoading(true);
-        // Add your sign-in logic here
-        setTimeout(() => {
+        try {
+            setIsLoading(true);
+            await login(formData);
+        } catch (error) {
+            console.log(error);
+        } finally {
             setIsLoading(false);
-            Alert.alert("Success", "Connected to the Grid!");
-            console.log(formData);
-        }, 1000);
+        }
     };
 
     const handleBiometricLogin = (): void => {
@@ -109,11 +113,11 @@ const SignInPage: React.FC = () => {
                         <InputField
                             title="Access ID"
                             icon="mail-outline"
-                            keyId="email"
-                            value={formData.email}
-                            placeholder="neural@grid.com"
+                            keyId="username"
+                            value={formData.username}
+                            placeholder="neural"
                             keyboardType="email-address"
-                            autoComplete="email"
+                            autoComplete="username"
                             secured={false}
                             bottomMargin="mb-5"
                             handleInputChange={handleInputChange}

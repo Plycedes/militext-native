@@ -1,5 +1,5 @@
 import { AuthContextType, UserInterface } from "@/types/misc";
-import { loginUser, logoutUser, registerUser } from "@/utils/api";
+import { loginUser, logoutUser, registerUser } from "@/utils/apiMethods";
 import { LocalStorageAsync } from "@/utils/localstorage";
 import { router } from "expo-router";
 import { createContext, useContext, useEffect, useState } from "react";
@@ -21,11 +21,13 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
     const login = async (data: { username: string; password: string }) => {
         try {
-            const res = await loginUser(data);
+            const response = await loginUser(data);
+            const res = response.data;
             setUser(res.data.user);
             setToken(res.data.accessToken);
-            await LocalStorageAsync.set("user", res.data.user);
-            await LocalStorageAsync.set("token", res.data.accessToken);
+            await LocalStorageAsync.set("user", JSON.stringify(res.data.user));
+            await LocalStorageAsync.set("access", res.data.accessToken);
+            await LocalStorageAsync.set("refresh", res.data.accessToken);
             router.replace("/");
         } catch (error: any) {
             console.log("Error occured", error);
@@ -58,13 +60,13 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     useEffect(() => {
         setIsLoading(true);
         (async () => {
-            const _token = await LocalStorageAsync.get("token");
+            const _token = await LocalStorageAsync.get("access");
             const _user = await LocalStorageAsync.get("user");
             if (_token && _user?._id) {
-                setUser(_user);
+                setUser(JSON.parse(_user));
                 setToken(_token);
             } else {
-                // router.replace("/sign-in");
+                router.replace("/sign-in");
             }
         })();
         setIsLoading(false);
