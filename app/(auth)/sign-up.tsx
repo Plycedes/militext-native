@@ -1,4 +1,5 @@
 import { GlassButton, InputField } from "@/components";
+import { useAuth } from "@/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
@@ -31,6 +32,8 @@ const SignUpPage: React.FC = () => {
     });
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
+    const { register } = useAuth();
+
     const handleInputChange = (field: string, value: string): void => {
         setFormData((prev) => ({ ...prev, [field]: value }));
     };
@@ -52,13 +55,14 @@ const SignUpPage: React.FC = () => {
             return;
         }
 
-        setIsLoading(true);
-        // Add your sign-up logic here
-        setTimeout(() => {
+        try {
+            setIsLoading(true);
+            await register(formData);
+        } catch (error) {
+            console.log(error);
+        } finally {
             setIsLoading(false);
-            console.log(formData);
-            Alert.alert("Success", "Account created successfully!");
-        }, 1000);
+        }
     };
 
     const navigateToSignIn = (): void => {
