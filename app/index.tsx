@@ -8,8 +8,8 @@ import { getUserChats } from "@/utils/apiMethods";
 import { ChatEventEnum } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { RelativePathString, router } from "expo-router";
-import React, { JSX, useEffect, useRef, useState } from "react";
+import { RelativePathString, router, useFocusEffect } from "expo-router";
+import React, { JSX, useCallback, useEffect, useRef, useState } from "react";
 import {
     Animated,
     Dimensions,
@@ -28,11 +28,9 @@ const { width } = Dimensions.get("window");
 const AllChatsPage: React.FC = () => {
     const { data, refetch } = useAxios<Chat[]>(getUserChats);
     const [searchQuery, setSearchQuery] = useState<string>("");
-    const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
     const [isSearchVisible, setIsSearchVisible] = useState<boolean>(false);
     const [selectedFilter, setSelectedFilter] = useState<"all" | "individual" | "groups">("all");
 
-    const dropdownHeight = useRef(new Animated.Value(0)).current;
     const searchOpacity = useRef(new Animated.Value(0)).current;
 
     const { socket } = useSocket();
@@ -97,30 +95,15 @@ const AllChatsPage: React.FC = () => {
         };
     }, [data, socket]);
 
+    useFocusEffect(
+        useCallback(() => {
+            refetch();
+        }, [refetch])
+    );
+
     const onNewMessage = async () => {
         console.log("New Message");
         await refetch();
-    };
-
-    const toggleDropdown = (): void => {
-        const toValue = isDropdownOpen ? 0 : dropdownOptions.length * 50;
-        setIsDropdownOpen(!isDropdownOpen);
-
-        if (toValue === 0) {
-            Animated.timing(dropdownHeight, {
-                toValue,
-                duration: 250,
-                useNativeDriver: false,
-                easing: Easing.inOut(Easing.ease),
-            }).start();
-        } else {
-            Animated.spring(dropdownHeight, {
-                toValue,
-                useNativeDriver: false,
-                tension: 100,
-                friction: 8,
-            }).start();
-        }
     };
 
     const closeSearch = () => {
@@ -339,18 +322,6 @@ const AllChatsPage: React.FC = () => {
                     title=""
                     position="absolute bottom-12 right-6"
                 />
-
-                {/* Bottom Status Bar */}
-                <View className="absolute bottom-0 left-0 right-0 bg-gray-900/30 backdrop-blur-md border-t border-cyan-500/20">
-                    <View className="flex-row items-center justify-between px-6 py-2">
-                        <View className="flex-row items-center">
-                            <View className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse" />
-                            <Text className="ml-2 text-cyan-300 text-xs">Grid Status: Online</Text>
-                        </View>
-                        <Text className="text-cyan-500/70 text-xs">Neural Protocol v2.1</Text>
-                    </View>
-                    <View className="h-0.5 bg-gradient-to-r from-transparent via-cyan-500/70 to-transparent animate-pulse" />
-                </View>
             </LinearGradient>
         </SafeAreaView>
     );

@@ -31,7 +31,15 @@ const ChatPage: React.FC = () => {
 
     const [input, setInput] = useState<string>("");
     const [messages, setMessages] = useState<Message[]>([]);
+    const [isTyping, setIsTyping] = useState(false);
+    const [typingUser, setTypingUser] = useState<string | null>(null);
+    const [initialLoad, setInitialLoad] = useState(true);
 
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+
+    const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const flatListRef = useRef<FlatList<Message>>(null);
 
     const menuOptions: DropdownOption[] = useMemo(
@@ -81,12 +89,59 @@ const ChatPage: React.FC = () => {
         if (!socket) return;
         socket.emit(ChatEventEnum.JOIN_CHAT_EVENT, chatId);
         socket.on(ChatEventEnum.NEW_MESSAGE_EVENT, onNewMessage);
+        socket.on(ChatEventEnum.TYPING_EVENT, onTyping);
+        socket.on(ChatEventEnum.STOP_TYPING_EVENT, onStopTyping);
 
         return () => {
             socket.off(ChatEventEnum.NEW_MESSAGE_EVENT, onNewMessage);
+            socket.off(ChatEventEnum.TYPING_EVENT, onTyping);
+            socket.off(ChatEventEnum.STOP_TYPING_EVENT, onStopTyping);
             socket.emit(ChatEventEnum.LEAVE_CHAT_EVENT, chatId);
         };
     }, [data, chatId, socket]);
+
+    useEffect(() => {
+        return () => {
+            if (typingTimeoutRef.current) {
+                clearTimeout(typingTimeoutRef.current);
+            }
+        };
+    }, []);
+
+    useEffect(() => {
+        if (data) {
+            setMessages(data.messages);
+
+            if (initialLoad) {
+                setTimeout(() => {
+                    flatListRef.current?.scrollToEnd({ animated: false });
+                    setInitialLoad(false);
+                }, 0);
+            }
+        }
+    }, [data]);
+
+    const handleTyping = (text: string) => {
+        setInput(text);
+
+        if (!socket) return;
+
+        if (!isTyping) {
+            setIsTyping(true);
+            socket.emit(ChatEventEnum.TYPING_EVENT, chatId);
+        }
+
+        // Clear old timeout
+        if (typingTimeoutRef.current) {
+            clearTimeout(typingTimeoutRef.current);
+        }
+
+        // Start new timeout — if no typing for 2s, stop typing
+        typingTimeoutRef.current = setTimeout(() => {
+            setIsTyping(false);
+            socket.emit(ChatEventEnum.STOP_TYPING_EVENT, chatId);
+        }, 2000);
+    };
 
     const onSend = (): void => {
         const content: string = input.trim();
@@ -108,8 +163,50 @@ const ChatPage: React.FC = () => {
     };
 
     const onNewMessage = (message: Message) => {
-        console.log(message);
+        // console.log(message);
         setMessages((prev) => [...prev, message]);
+        setTimeout(() => {
+            flatListRef.current?.scrollToEnd({ animated: true });
+        }, 50);
+    };
+
+    const onTyping = (data: { username: string }) => {
+        const { username } = data;
+        if (user?.username !== username) {
+            setTypingUser(username);
+        }
+    };
+
+    const onStopTyping = () => {
+        setTypingUser(null);
+    };
+
+    const handleScroll = () => {
+        setTimeout(() => {
+            flatListRef.current?.scrollToEnd({ animated: true });
+        }, 0);
+    };
+
+    const fetchMessages = async (pageNum: number) => {
+        const response = await getChatMessages(chatId, pageNum, 20);
+        const res = response.data.data as MessagesResponse;
+        if (res.messages.length > 0) {
+            setMessages((prev) => [...res.messages, ...prev]); // prepend older
+            setHasMore(res.hasMore);
+        }
+    };
+
+    const handleTopScroll = ({ nativeEvent }: any) => {
+        if (nativeEvent.contentOffset.y <= 0 && hasMore) {
+            if (debounceRef.current) {
+                clearTimeout(debounceRef.current);
+            }
+            debounceRef.current = setTimeout(() => {
+                console.log("Fetching");
+                fetchMessages(page + 1);
+                setPage((prev) => prev + 1);
+            }, 300); // wait 300ms before actually calling
+        }
     };
 
     const renderMessage = ({ item, index }: { item: Message; index: number }) => {
@@ -143,9 +240,9 @@ const ChatPage: React.FC = () => {
                         <Text className="text-white">{item.content}</Text>
                         <View className={`mt-1 ${isMe ? "items-end" : "items-start"}`}>
                             <Text
-                                className={`${isMe ? "text-cyan-300/80" : false ? "text-yellow-300/80" : "text-slate-300/70"} text-xxs`}
+                                className={`${isMe ? "text-cyan-300/80" : false ? "text-yellow-300/80" : "text-slate-300/70"} text-xs`}
                             >
-                                {item.updatedAt}
+                                {new Date(item.updatedAt).toLocaleString()}
                             </Text>
                         </View>
                     </View>
@@ -160,7 +257,7 @@ const ChatPage: React.FC = () => {
 
             <LinearGradient
                 colors={["#0a0a0a", "#1a0a2e", "#16213e", "#0f3460"]}
-                className="flex-1"
+                className="flex-1 pb-10"
             >
                 <KeyboardAvoidingView
                     behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -172,7 +269,7 @@ const ChatPage: React.FC = () => {
                         <Header
                             dropdownOptions={menuOptions}
                             title={chatName}
-                            subtitle="Secure link active"
+                            subtitle={typingUser ? `${typingUser} is typing...` : ""}
                         />
                     </View>
 
@@ -184,9 +281,9 @@ const ChatPage: React.FC = () => {
                         renderItem={renderMessage}
                         showsVerticalScrollIndicator={false}
                         contentContainerStyle={{ paddingBottom: 96, paddingTop: 6 }}
-                        onContentSizeChange={() =>
-                            flatListRef.current?.scrollToEnd({ animated: true })
-                        }
+                        // onScrollToTop={handleTopScroll}
+                        onScroll={handleTopScroll}
+                        scrollEventThrottle={16}
                     />
 
                     {/* Input Dock */}
@@ -203,15 +300,17 @@ const ChatPage: React.FC = () => {
                                 </TouchableOpacity>
 
                                 {/* Input */}
+
                                 <View className="flex-1">
                                     <TextInput
                                         className="text-white text-base px-3 py-2"
                                         placeholder="Transmit message…"
                                         placeholderTextColor="#7dd3fc99"
                                         value={input}
-                                        onChangeText={setInput}
+                                        onChangeText={handleTyping}
                                         multiline
                                         maxLength={4000}
+                                        onPress={handleScroll}
                                     />
                                 </View>
 
@@ -233,17 +332,6 @@ const ChatPage: React.FC = () => {
                                     />
                                 </TouchableOpacity>
                             </View>
-                        </View>
-                    </View>
-
-                    {/* Bottom holo strip */}
-                    <View className="px-6 pb-3">
-                        <View className="h-[1px] bg-cyan-500/20" />
-                        <View className="flex-row justify-between mt-2">
-                            <Text className="text-cyan-300/70 text-xxs">
-                                Quantum Tunnel: Stable
-                            </Text>
-                            <Text className="text-cyan-300/50 text-xxs">Protocol v2.1</Text>
                         </View>
                     </View>
                 </KeyboardAvoidingView>

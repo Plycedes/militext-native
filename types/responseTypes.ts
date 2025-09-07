@@ -12,6 +12,9 @@ export interface Message {
 export interface MessagesResponse {
     messages: Message[];
     lastRead: string | null;
+    page: number;
+    limit: number;
+    hasMore: boolean;
 }
 
 export interface UserChat {
