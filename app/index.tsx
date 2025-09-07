@@ -91,7 +91,11 @@ const AllChatsPage: React.FC = () => {
             console.log("[SOCKET EVENT]", event, args);
         });
         socket.on(ChatEventEnum.NEW_MESSAGE_EVENT, onNewMessage);
-    }, [data]);
+
+        return () => {
+            socket.off(ChatEventEnum.NEW_MESSAGE_EVENT, onNewMessage);
+        };
+    }, [data, socket]);
 
     const onNewMessage = async () => {
         console.log("New Message");
@@ -163,14 +167,11 @@ const AllChatsPage: React.FC = () => {
 
         return (
             <TouchableOpacity onPress={() => navigateToChat(item)} className="mx-4 mb-3">
-                <LinearGradient
-                    colors={
-                        isUnread
-                            ? ["rgba(255, 215, 0, 0.08)", "rgba(255, 200, 0, 0.12)"] // Yellow glossy
-                            : ["rgba(0,212,255,0.05)", "rgba(14,165,233,0.08)"] // Cyan glossy
-                    }
+                <View
                     className={`rounded-2xl p-4 backdrop-blur-md ${
-                        isUnread ? "border border-yellow-400/40" : "border border-cyan-500/30"
+                        isUnread
+                            ? "border border-yellow-400/40 bg-yellow-400/10"
+                            : "border border-cyan-500/30 bg-cyan-400/10"
                     }`}
                 >
                     <View className="flex-row items-center">
@@ -240,7 +241,7 @@ const AllChatsPage: React.FC = () => {
                             </View>
                         )}
                     </View>
-                </LinearGradient>
+                </View>
             </TouchableOpacity>
         );
     };
@@ -254,7 +255,7 @@ const AllChatsPage: React.FC = () => {
                 className="flex-1"
             >
                 {/* Header */}
-                <View className="">
+                <View className="px-4 pt-10 pb-2">
                     <Header
                         title="Neural Channels"
                         subtitle={`${chats.length} active connections`}

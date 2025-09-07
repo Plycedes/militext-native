@@ -41,7 +41,7 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle, dropdownOptions }) => 
     };
 
     return (
-        <View className="px-6 pt-10 pb-2">
+        <View className="">
             {/* Title + Menu */}
             <View className="flex-row items-center justify-between mb-4">
                 <View>

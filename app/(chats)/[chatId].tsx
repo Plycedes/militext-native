@@ -1,17 +1,17 @@
 import { Header } from "@/components";
 import { useAuth } from "@/context/AuthContext";
+import { useSocket } from "@/context/SocketContext";
 import useAxios from "@/hooks/useAxios";
-import { UserInterface } from "@/types/misc";
+import { DropdownOption } from "@/types/misc";
 import { Message, MessagesResponse } from "@/types/responseTypes";
 import { getChatMessages } from "@/utils/apiMethods";
+import { ChatEventEnum } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams } from "expo-router";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
     Alert,
-    Animated,
-    Easing,
     FlatList,
     KeyboardAvoidingView,
     Platform,
@@ -23,27 +23,18 @@ import {
     View,
 } from "react-native";
 
-type MenuOption = {
-    id: string;
-    label: string;
-    icon: keyof typeof Ionicons.glyphMap;
-    action: () => void;
-};
-
 const ChatPage: React.FC = () => {
     const { chatId, chatName } = useLocalSearchParams<{ chatId: string; chatName: string }>();
     const { user } = useAuth();
+    const { socket } = useSocket();
     const { data } = useAxios<MessagesResponse>(getChatMessages, chatId);
 
     const [input, setInput] = useState<string>("");
     const [messages, setMessages] = useState<Message[]>([]);
-    const [menuOpen, setMenuOpen] = useState<boolean>(false);
 
-    // Animated dropdown (height + opacity for buttery open/close)
-    const dropdownH = useRef(new Animated.Value(0)).current;
-    const dropdownOpacity = useRef(new Animated.Value(0)).current;
+    const flatListRef = useRef<FlatList<Message>>(null);
 
-    const menuOptions: MenuOption[] = useMemo(
+    const menuOptions: DropdownOption[] = useMemo(
         () => [
             {
                 id: "search",
@@ -82,62 +73,30 @@ const ChatPage: React.FC = () => {
     useEffect(() => {
         if (data) {
             setMessages(data.messages);
-        }
-    }, [data, chatId]);
 
-    const toggleMenu = (): void => {
-        const toOpen = !menuOpen;
-        setMenuOpen(toOpen);
-
-        if (toOpen) {
-            Animated.parallel([
-                Animated.spring(dropdownH, {
-                    toValue: menuOptions.length * 52,
-                    useNativeDriver: false,
-                    friction: 10,
-                    tension: 120,
-                }),
-                Animated.timing(dropdownOpacity, {
-                    toValue: 1,
-                    duration: 180,
-                    useNativeDriver: true,
-                    easing: Easing.out(Easing.ease),
-                }),
-            ]).start();
-        } else {
-            Animated.parallel([
-                Animated.timing(dropdownH, {
-                    toValue: 0,
-                    duration: 220,
-                    useNativeDriver: false,
-                    easing: Easing.inOut(Easing.ease),
-                }),
-                Animated.timing(dropdownOpacity, {
-                    toValue: 0,
-                    duration: 120,
-                    useNativeDriver: true,
-                }),
-            ]).start();
+            setTimeout(() => {
+                flatListRef.current?.scrollToEnd({ animated: false });
+            }, 0);
         }
-    };
+        if (!socket) return;
+        socket.emit(ChatEventEnum.JOIN_CHAT_EVENT, chatId);
+        socket.on(ChatEventEnum.NEW_MESSAGE_EVENT, onNewMessage);
+
+        return () => {
+            socket.off(ChatEventEnum.NEW_MESSAGE_EVENT, onNewMessage);
+            socket.emit(ChatEventEnum.LEAVE_CHAT_EVENT, chatId);
+        };
+    }, [data, chatId, socket]);
 
     const onSend = (): void => {
-        const trimmed: string = input.trim();
-        if (!trimmed) return;
-        const sender: UserInterface = {
-            _id: user!._id,
-            username: user!.username,
-        };
-        const newMsg: Message = {
-            _id: `${Date.now()}`,
-            content: trimmed,
-            updatedAt: `${Date.now()}`,
-            createdAt: `${Date.now()}`,
-            sender: sender,
-            chat: chatId,
-        };
-        setMessages((prev) => [...prev, newMsg]);
+        const content: string = input.trim();
+        if (!content || !socket) return;
         setInput("");
+        socket.emit(ChatEventEnum.NEW_MESSAGE_EVENT, { chatId, content });
+
+        setTimeout(() => {
+            flatListRef.current?.scrollToEnd({ animated: true });
+        }, 50);
     };
 
     const onAttach = (): void => {
@@ -146,6 +105,11 @@ const ChatPage: React.FC = () => {
             { text: "Library", onPress: () => {} },
             { text: "Cancel", style: "cancel" },
         ]);
+    };
+
+    const onNewMessage = (message: Message) => {
+        console.log(message);
+        setMessages((prev) => [...prev, message]);
     };
 
     const renderMessage = ({ item, index }: { item: Message; index: number }) => {
@@ -167,22 +131,13 @@ const ChatPage: React.FC = () => {
                 )}
 
                 <View className={`flex-row mb-2 ${isMe ? "justify-end" : "justify-start"}`}>
-                    <LinearGradient
-                        colors={
-                            isMe
-                                ? ["rgba(0,212,255,0.08)", "rgba(14,165,233,0.12)"] // my bubble cyan glass
-                                : false
-                                  ? ["rgba(255,215,0,0.08)", "rgba(255,200,0,0.14)"] // unread yellow glass
-                                  : ["rgba(148,163,184,0.08)", "rgba(71,85,105,0.12)"] // neutral slate glass
-                        }
-                        start={{ x: 0, y: 0 }}
-                        end={{ x: 1, y: 1 }}
+                    <View
                         className={`max-w-[80%] rounded-2xl px-4 py-3 ${
                             isMe
-                                ? "border border-cyan-400/30 shadow-cyan-500/20 shadow-md"
+                                ? "border border-cyan-400/30 shadow-cyan-400/20 shadow-md bg-cyan-400/10"
                                 : false
-                                  ? "border border-yellow-400/40 shadow-yellow-400/20 shadow-md"
-                                  : "border border-slate-400/20"
+                                  ? "border border-yellow-400/40 shadow-yellow-400/20 shadow-md bg-yellow-400/10"
+                                  : "border border-slate-400/30 shadow-slate-400/20 shadow-md bg-slate-400/10"
                         }`}
                     >
                         <Text className="text-white">{item.content}</Text>
@@ -193,7 +148,7 @@ const ChatPage: React.FC = () => {
                                 {item.updatedAt}
                             </Text>
                         </View>
-                    </LinearGradient>
+                    </View>
                 </View>
             </View>
         );
@@ -213,20 +168,25 @@ const ChatPage: React.FC = () => {
                     style={{ flex: 1 }}
                 >
                     {/* Header */}
-                    <Header
-                        dropdownOptions={menuOptions}
-                        title={chatName}
-                        subtitle="Scure link active"
-                    />
+                    <View className="px-4 pt-10 pb-2">
+                        <Header
+                            dropdownOptions={menuOptions}
+                            title={chatName}
+                            subtitle="Secure link active"
+                        />
+                    </View>
 
                     {/* Messages */}
                     <FlatList
+                        ref={flatListRef}
                         data={messages}
                         keyExtractor={(m) => m._id}
                         renderItem={renderMessage}
                         showsVerticalScrollIndicator={false}
                         contentContainerStyle={{ paddingBottom: 96, paddingTop: 6 }}
-                        onScrollBeginDrag={() => menuOpen && toggleMenu()}
+                        onContentSizeChange={() =>
+                            flatListRef.current?.scrollToEnd({ animated: true })
+                        }
                     />
 
                     {/* Input Dock */}
