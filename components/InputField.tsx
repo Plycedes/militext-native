@@ -30,11 +30,11 @@ const InputField: React.FC<InputFieldTypes> = ({
     const [showValue, setShowValue] = useState<boolean>(false);
     return (
         <View className={bottomMargin}>
-            <Text className="text-cyan-300 text-sm font-medium mb-2">{title}</Text>
+            <Text className="text-cyan-300 text-sm font-pmedium mb-2">{title}</Text>
             <View className="bg-gray-800/50 rounded-xl border border-gray-700/50 flex-row items-center px-4 py-3 shadow-inner">
                 <Ionicons name={icon} size={20} color="#00d4ff" />
                 <TextInput
-                    className="flex-1 ml-3 text-white text-base"
+                    className="flex-1 ml-3 text-white font-pregular text-base"
                     placeholder={placeholder}
                     placeholderTextColor="#64748b"
                     value={value}

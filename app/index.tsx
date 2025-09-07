@@ -180,7 +180,7 @@ const AllChatsPage: React.FC = () => {
                         <View className="flex-1 ml-4">
                             <View className="flex-row items-center justify-between mb-1">
                                 <View className="flex-row items-center">
-                                    <Text className="text-white font-semibold text-base">
+                                    <Text className="text-white font-psemibold text-base">
                                         {item.isGroupChat
                                             ? item.name
                                             : item.participants[0].username === user?.username
@@ -194,7 +194,7 @@ const AllChatsPage: React.FC = () => {
                                             }`}
                                         >
                                             <Text
-                                                className={`text-xs ${
+                                                className={`text-xs font-pmedium ${
                                                     isUnread ? "text-yellow-400" : "text-cyan-400"
                                                 }`}
                                             >
@@ -203,12 +203,12 @@ const AllChatsPage: React.FC = () => {
                                         </View>
                                     )}
                                 </View>
-                                <Text className="text-gray-400 text-xs">
+                                <Text className="text-gray-400 font-pregular text-xs">
                                     {new Date(item.updatedAt).toLocaleString()}
                                 </Text>
                             </View>
 
-                            <Text className="text-gray-300 text-sm" numberOfLines={1}>
+                            <Text className="text-gray-300 font-pregular text-sm" numberOfLines={1}>
                                 {item.lastMessage.content}
                             </Text>
                         </View>
@@ -276,7 +276,7 @@ const AllChatsPage: React.FC = () => {
                                 }`}
                             >
                                 <Text
-                                    className={`text-center text-sm font-medium ${
+                                    className={`text-center text-sm font-pmedium ${
                                         selectedFilter === filter
                                             ? "text-cyan-400"
                                             : "text-gray-400"

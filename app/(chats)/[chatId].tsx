@@ -119,7 +119,7 @@ const ChatPage: React.FC = () => {
                 }, 0);
             }
         }
-    }, [data]);
+    }, [messages]);
 
     const handleTyping = (text: string) => {
         setInput(text);
@@ -222,7 +222,7 @@ const ChatPage: React.FC = () => {
                 {showUnreadDivider && (
                     <View className="flex-row items-center my-3">
                         <View className="flex-1 h-[1px] bg-yellow-400/30" />
-                        <Text className="mx-2 text-yellow-300/90 text-xxs">Unread</Text>
+                        <Text className="mx-2 text-yellow-300/90 text-xs">Unread</Text>
                         <View className="flex-1 h-[1px] bg-yellow-400/30" />
                     </View>
                 )}
@@ -231,16 +231,16 @@ const ChatPage: React.FC = () => {
                     <View
                         className={`max-w-[80%] rounded-2xl px-4 py-3 ${
                             isMe
-                                ? "border border-cyan-400/30 shadow-cyan-400/20 shadow-md bg-cyan-400/10"
+                                ? "border border-slate-400/30 shadow-slate-400/20 shadow-md bg-slate-400/10"
                                 : false
                                   ? "border border-yellow-400/40 shadow-yellow-400/20 shadow-md bg-yellow-400/10"
-                                  : "border border-slate-400/30 shadow-slate-400/20 shadow-md bg-slate-400/10"
+                                  : "border border-cyan-400/30 shadow-cyan-400/20 shadow-md bg-cyan-400/10"
                         }`}
                     >
                         <Text className="text-white">{item.content}</Text>
                         <View className={`mt-1 ${isMe ? "items-end" : "items-start"}`}>
                             <Text
-                                className={`${isMe ? "text-cyan-300/80" : false ? "text-yellow-300/80" : "text-slate-300/70"} text-xs`}
+                                className={`${isMe ? "text-slate-300/70" : false ? "text-yellow-300/80" : "text-cyan-300/80"} text-xs`}
                             >
                                 {new Date(item.updatedAt).toLocaleString()}
                             </Text>

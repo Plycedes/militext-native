@@ -45,8 +45,10 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle, dropdownOptions }) => 
             {/* Title + Menu */}
             <View className="flex-row items-center justify-between mb-4">
                 <View>
-                    <Text className="text-2xl font-bold text-white">{title}</Text>
-                    <Text className="text-cyan-300 text-sm opacity-80">{subtitle}</Text>
+                    <Text className="text-2xl font-pbold text-white">{title}</Text>
+                    <Text className="text-cyan-300 text-sm font-pregular opacity-80">
+                        {subtitle}
+                    </Text>
                 </View>
 
                 <TouchableOpacity
@@ -71,8 +73,8 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle, dropdownOptions }) => 
                         }}
                         className="flex-row items-center px-4 py-3 border-b border-gray-700/30 last:border-b-0"
                     >
-                        <Ionicons name={option.icon} size={20} color="#00d4ff" />
-                        <Text className="ml-3 text-white font-medium">{option.label}</Text>
+                        <Ionicons name={option.icon} size={20} color="#00d4ff" className="pb-1" />
+                        <Text className="ml-3 text-white font-pmedium">{option.label}</Text>
                     </TouchableOpacity>
                 ))}
             </Animated.View>

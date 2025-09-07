@@ -94,10 +94,10 @@ const SignInPage: React.FC = () => {
                                 <View className="absolute w-24 h-24 border border-cyan-400/10 rounded-full animate-ping" />
                             </View>
                         </View>
-                        <Text className="text-4xl font-bold text-white text-center mb-3">
+                        <Text className="text-4xl font-pbold text-white text-center mb-3">
                             Access Grid
                         </Text>
-                        <Text className="text-cyan-300 text-center opacity-80 text-lg">
+                        <Text className="text-cyan-300 text-center font-pmedium opacity-80 text-lg">
                             Enter the neural network
                         </Text>
                         <View className="flex-row items-center justify-center mt-3">
@@ -154,11 +154,13 @@ const SignInPage: React.FC = () => {
                                         <Ionicons name="checkmark" size={14} color="white" />
                                     )}
                                 </View>
-                                <Text className="text-gray-300 text-sm">Stay connected</Text>
+                                <Text className="text-gray-300 font-pregular text-sm">
+                                    Stay connected
+                                </Text>
                             </TouchableOpacity>
 
                             <TouchableOpacity onPress={handleForgotPassword}>
-                                <Text className="text-cyan-400 text-sm font-medium underline">
+                                <Text className="text-cyan-400 text-sm font-pmedium underline">
                                     Reset Key?
                                 </Text>
                             </TouchableOpacity>
@@ -226,9 +228,9 @@ const SignInPage: React.FC = () => {
 
                     {/* Sign Up Link */}
                     <View className="flex-row justify-center mt-8 mb-8">
-                        <Text className="text-gray-400">New to the Grid? </Text>
+                        <Text className="text-gray-400 font-pregular">New to the Grid? </Text>
                         <TouchableOpacity onPress={navigateToSignUp}>
-                            <Text className="text-cyan-400 font-medium underline">
+                            <Text className="text-cyan-400 font-pmedium underline">
                                 Initialize Connection
                             </Text>
                         </TouchableOpacity>
@@ -236,18 +238,22 @@ const SignInPage: React.FC = () => {
 
                     {/* Footer */}
                     <View className="items-center pb-6">
-                        <Text className="text-gray-500 text-xs text-center mb-2">
+                        <Text className="text-gray-500 text-xs font-pregular text-center mb-2">
                             Secured by quantum encryption • Neural Protocol v2.1
                         </Text>
                         <View className="flex-row items-center space-x-2">
                             <View className="flex-row items-center">
                                 <View className="w-1 h-1 bg-green-400 rounded-full" />
-                                <Text className="ml-1 text-green-400 text-xs">Grid Online</Text>
+                                <Text className="ml-1 text-green-400 font-pregular text-xs">
+                                    Grid Online
+                                </Text>
                             </View>
                             <Text className="text-gray-600 text-xs">•</Text>
                             <View className="flex-row items-center">
                                 <View className="w-1 h-1 bg-cyan-400 rounded-full animate-pulse" />
-                                <Text className="ml-1 text-cyan-400 text-xs">Neural Active</Text>
+                                <Text className="ml-1 text-cyan-400 font-pregular text-xs">
+                                    Neural Active
+                                </Text>
                             </View>
                         </View>
                     </View>
