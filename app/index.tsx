@@ -1,4 +1,4 @@
-import { GlassButton } from "@/components";
+import { GlassButton, Header } from "@/components";
 import { useAuth } from "@/context/AuthContext";
 import { useSocket } from "@/context/SocketContext";
 import useAxios from "@/hooks/useAxios";
@@ -254,47 +254,12 @@ const AllChatsPage: React.FC = () => {
                 className="flex-1"
             >
                 {/* Header */}
-                <View className="px-6 pt-10 pb-2">
-                    <View className="flex-row items-center justify-between mb-4">
-                        <View>
-                            <Text className="text-2xl font-bold text-white">Neural Channels</Text>
-                            <Text className="text-cyan-300 text-sm opacity-80">
-                                {filteredChats.length} active connections
-                            </Text>
-                        </View>
-
-                        {/* Menu Button */}
-                        <TouchableOpacity
-                            onPress={toggleDropdown}
-                            className="w-10 h-10 bg-cyan-400/20 rounded-full items-center justify-center border border-cyan-400/30"
-                        >
-                            <Ionicons
-                                name={isDropdownOpen ? "close" : "menu"}
-                                size={20}
-                                color="#00d4ff"
-                            />
-                        </TouchableOpacity>
-                    </View>
-
-                    {/* Dropdown Menu */}
-                    <Animated.View
-                        style={{ height: dropdownHeight, overflow: "hidden" }}
-                        className="bg-gray-900/60 rounded-xl border border-cyan-500/20 backdrop-blur-sm"
-                    >
-                        {dropdownOptions.map((option) => (
-                            <TouchableOpacity
-                                key={option.id}
-                                onPress={() => {
-                                    option.action();
-                                    toggleDropdown();
-                                }}
-                                className="flex-row items-center px-4 py-3 border-b border-gray-700/30 last:border-b-0"
-                            >
-                                <Ionicons name={option.icon} size={20} color="#00d4ff" />
-                                <Text className="ml-3 text-white font-medium">{option.label}</Text>
-                            </TouchableOpacity>
-                        ))}
-                    </Animated.View>
+                <View className="">
+                    <Header
+                        title="Neural Channels"
+                        subtitle={`${chats.length} active connections`}
+                        dropdownOptions={dropdownOptions}
+                    />
 
                     {/* Search Bar (hidden until opened via menu) */}
                     {isSearchVisible && (

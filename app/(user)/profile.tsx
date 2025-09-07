@@ -128,9 +128,9 @@ const ProfilePage: React.FC = () => {
                             onPress={() => console.log("Edit")}
                             isLoading={false}
                             icon={<Ionicons name="clipboard-outline" size={18} color="#fbbf24" />}
-                            borderColor="yellow-400/30"
-                            textColor="yellow-400"
-                            bgColor="yellow-400/10"
+                            borderColor="border-yellow-400/30"
+                            textColor="text-yellow-400"
+                            bgColor="bg-yellow-400/10"
                         />
                     </View>
 

@@ -1,4 +1,4 @@
-// app/chat/[id].tsx (or wherever you route it)
+import { Header } from "@/components";
 import { useAuth } from "@/context/AuthContext";
 import useAxios from "@/hooks/useAxios";
 import { UserInterface } from "@/types/misc";
@@ -6,7 +6,7 @@ import { Message, MessagesResponse } from "@/types/responseTypes";
 import { getChatMessages } from "@/utils/apiMethods";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { router, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
     Alert,
@@ -82,7 +82,6 @@ const ChatPage: React.FC = () => {
     useEffect(() => {
         if (data) {
             setMessages(data.messages);
-            //console.log(data.messages);
         }
     }, [data, chatId]);
 
@@ -214,71 +213,11 @@ const ChatPage: React.FC = () => {
                     style={{ flex: 1 }}
                 >
                     {/* Header */}
-                    <View className="px-6 pt-10 pb-3">
-                        <View className="flex-row items-center justify-between">
-                            <View className="flex-row items-center">
-                                <TouchableOpacity
-                                    onPress={() => router.back()}
-                                    className="w-10 h-10 bg-white/10 border border-cyan-400/30 backdrop-blur-md rounded-full items-center justify-center mr-3"
-                                >
-                                    <Ionicons name="arrow-back" size={18} color="#00d4ff" />
-                                </TouchableOpacity>
-                                <View>
-                                    <Text className="text-white text-xl font-semibold">
-                                        {chatName}
-                                    </Text>
-                                    <Text className="text-cyan-300 text-xxs opacity-80">
-                                        Secure link active
-                                    </Text>
-                                </View>
-                            </View>
-
-                            {/* Menu */}
-                            <View>
-                                <TouchableOpacity
-                                    onPress={toggleMenu}
-                                    className="w-10 h-10 bg-white/10 border border-cyan-400/30 backdrop-blur-md rounded-full items-center justify-center"
-                                    activeOpacity={0.85}
-                                >
-                                    <Ionicons
-                                        name={menuOpen ? "close" : "ellipsis-vertical"}
-                                        size={18}
-                                        color="#00d4ff"
-                                    />
-                                </TouchableOpacity>
-
-                                {/* Animated Dropdown */}
-                                <Animated.View
-                                    style={{
-                                        height: dropdownH,
-                                        opacity: dropdownOpacity,
-                                        overflow: "hidden",
-                                    }}
-                                    className="absolute right-0 mt-2 w-48 bg-gray-900/60 border border-cyan-500/20 rounded-xl backdrop-blur-md"
-                                >
-                                    {menuOptions.map((opt, idx) => (
-                                        <TouchableOpacity
-                                            key={opt.id}
-                                            onPress={() => {
-                                                opt.action();
-                                                toggleMenu();
-                                            }}
-                                            className={`flex-row items-center px-3 py-3 ${idx < menuOptions.length - 1 ? "border-b border-gray-700/30" : ""}`}
-                                            activeOpacity={0.85}
-                                        >
-                                            <Ionicons name={opt.icon} size={18} color="#00d4ff" />
-                                            <Text className="ml-3 text-white text-sm">
-                                                {opt.label}
-                                            </Text>
-                                        </TouchableOpacity>
-                                    ))}
-                                </Animated.View>
-                            </View>
-                        </View>
-
-                        {/* Neon header line */}
-                        <View className="mt-4 h-[1px] bg-cyan-500/30" />
-                    </View>
+                    <Header
+                        dropdownOptions={menuOptions}
+                        title={chatName}
+                        subtitle="Scure link active"
+                    />
 
                     {/* Messages */}
                     <FlatList

@@ -22,9 +22,9 @@ const GlassButton: React.FC<GlassButtonProps> = ({
     size = "md",
     icon,
     position,
-    borderColor = "cyan-400/30",
-    textColor = "cyan-400",
-    bgColor = "cyan-400/10",
+    borderColor = "border-cyan-400/30",
+    textColor = "text-cyan-400",
+    bgColor = "bg-cyan-400/10",
 }) => {
     const sizeClasses =
         size === "sm"
@@ -40,9 +40,7 @@ const GlassButton: React.FC<GlassButtonProps> = ({
             activeOpacity={0.8}
             className={position ? position : "mb-4"}
         >
-            <View
-                className={`bg-${bgColor} border border-${borderColor} backdrop-blur-md ${sizeClasses}`}
-            >
+            <View className={`${bgColor} border ${borderColor} backdrop-blur-md ${sizeClasses}`}>
                 {isLoading ? (
                     <ActivityIndicator size="small" color="#22d3ee" />
                 ) : (
@@ -51,9 +49,7 @@ const GlassButton: React.FC<GlassButtonProps> = ({
                             // Both icon + title
                             <>
                                 <View>{icon}</View>
-                                <Text
-                                    className={`text-${textColor} text-center font-psemibold text-lg`}
-                                >
+                                <Text className={`${textColor} text-center font-psemibold text-lg`}>
                                     {title}
                                 </Text>
                             </>
@@ -62,9 +58,7 @@ const GlassButton: React.FC<GlassButtonProps> = ({
                             <View>{icon}</View>
                         ) : title ? (
                             // Only title
-                            <Text
-                                className={`text-${textColor} text-center font-psemibold text-lg`}
-                            >
+                            <Text className={`${textColor} text-center font-psemibold text-lg`}>
                                 {title}
                             </Text>
                         ) : null}
