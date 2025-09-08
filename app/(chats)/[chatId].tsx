@@ -35,7 +35,7 @@ const ChatPage: React.FC = () => {
     const [typingUser, setTypingUser] = useState<string | null>(null);
     const [initialLoad, setInitialLoad] = useState(true);
 
-    const [page, setPage] = useState(1);
+    const [before, setBefore] = useState<string | null>(null);
     const [hasMore, setHasMore] = useState(true);
 
     const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -109,15 +109,11 @@ const ChatPage: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        if (data) {
-            setMessages(data.messages);
-
-            if (initialLoad) {
-                setTimeout(() => {
-                    flatListRef.current?.scrollToEnd({ animated: false });
-                    setInitialLoad(false);
-                }, 0);
-            }
+        if (initialLoad) {
+            setTimeout(() => {
+                flatListRef.current?.scrollToEnd({ animated: false });
+                setInitialLoad(false);
+            }, 0);
         }
     }, [messages]);
 
@@ -163,7 +159,7 @@ const ChatPage: React.FC = () => {
     };
 
     const onNewMessage = (message: Message) => {
-        // console.log(message);
+        // console.log("Got message");
         setMessages((prev) => [...prev, message]);
         setTimeout(() => {
             flatListRef.current?.scrollToEnd({ animated: true });
@@ -187,25 +183,24 @@ const ChatPage: React.FC = () => {
         }, 0);
     };
 
-    const fetchMessages = async (pageNum: number) => {
-        const response = await getChatMessages(chatId, pageNum, 20);
+    const fetchMessages = async (beforeId?: string) => {
+        const response = await getChatMessages(chatId, messages[0]._id);
         const res = response.data.data as MessagesResponse;
         if (res.messages.length > 0) {
-            setMessages((prev) => [...res.messages, ...prev]); // prepend older
+            setMessages((prev) => [...res.messages, ...prev]);
             setHasMore(res.hasMore);
         }
     };
 
     const handleTopScroll = ({ nativeEvent }: any) => {
-        if (nativeEvent.contentOffset.y <= 0 && hasMore) {
+        if (nativeEvent.contentOffset.y <= 0 && hasMore && before) {
             if (debounceRef.current) {
                 clearTimeout(debounceRef.current);
             }
             debounceRef.current = setTimeout(() => {
-                console.log("Fetching");
-                fetchMessages(page + 1);
-                setPage((prev) => prev + 1);
-            }, 300); // wait 300ms before actually calling
+                console.log("Fetching older messages before:", before);
+                fetchMessages(before);
+            }, 300);
         }
     };
 

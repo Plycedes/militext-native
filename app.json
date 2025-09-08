@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "militext",
-    "slug": "militext",
+    "name": "Grid",
+    "slug": "grid",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "militext",
+    "scheme": "grid",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -16,7 +16,8 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.plycedes2.grid"
     },
     "web": {
       "bundler": "metro",
@@ -38,6 +39,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "bf20408e-507d-45cf-b6f4-334c3a17bf3a"
+      }
     }
   }
 }

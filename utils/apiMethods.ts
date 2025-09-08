@@ -56,8 +56,8 @@ const removeParticipantFromGroup = (chatId: string, participantId: string) => {
     return apiClient.delete(`/chats/group/${chatId}/${participantId}`);
 };
 
-const getChatMessages = (chatId?: string, page: number = 1, limit: number = 20) => {
-    return apiClient.get(`/messages/${chatId}?page=${page}&limit=${limit}`);
+const getChatMessages = (chatId?: string, before: string = "", limit: number = 20) => {
+    return apiClient.get(`/messages/${chatId}?before=${before}&limit=${limit}`);
 };
 
 const sendMessage = (chatId: string, content: string, attachments: File[]) => {
