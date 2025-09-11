@@ -66,10 +66,7 @@ const SignInPage: React.FC = () => {
     };
 
     const handleForgotPassword = (): void => {
-        Alert.alert(
-            "Reset Key",
-            "Recovery protocol initiated. Check your neural implant for instructions."
-        );
+        router.push("/forgot");
     };
 
     return (

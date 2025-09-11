@@ -4,12 +4,17 @@ import { KeyboardTypeOptions, Text, TextInput, TouchableOpacity, View } from "re
 
 interface InputFieldTypes {
     title: string;
-    icon: "lock-closed-outline" | "person-outline" | "mail-outline" | "phone-portrait-outline";
+    icon:
+        | "lock-closed-outline"
+        | "person-outline"
+        | "mail-outline"
+        | "phone-portrait-outline"
+        | "key-outline";
     keyId: string;
     value: string;
     placeholder: string;
     keyboardType: KeyboardTypeOptions;
-    autoComplete: "password" | "email" | "username" | "tel";
+    autoComplete: "password" | "email" | "username" | "tel" | "sms-otp";
     secured: boolean;
     bottomMargin: string;
     handleInputChange: (key: string, value: string) => void;
