@@ -81,16 +81,21 @@ const AllChatsPage: React.FC = () => {
 
     useEffect(() => {
         if (data) {
-            //console.log(data);
             setChats(data);
         }
+
         if (!socket) return;
-        socket.onAny((event, ...args) => {
+
+        // Log all socket events
+        const logEvent = (event: string, ...args: unknown[]) => {
             console.log("[SOCKET EVENT]", event, args);
-        });
+        };
+
+        socket.onAny(logEvent);
         socket.on(ChatEventEnum.NEW_MESSAGE_EVENT, onNewMessage);
 
         return () => {
+            socket.offAny(logEvent);
             socket.off(ChatEventEnum.NEW_MESSAGE_EVENT, onNewMessage);
         };
     }, [data, socket]);
