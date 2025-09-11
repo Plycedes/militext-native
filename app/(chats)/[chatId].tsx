@@ -13,6 +13,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
     Alert,
     FlatList,
+    Keyboard,
     KeyboardAvoidingView,
     Platform,
     SafeAreaView,
@@ -34,6 +35,8 @@ const ChatPage: React.FC = () => {
     const [isTyping, setIsTyping] = useState(false);
     const [typingUser, setTypingUser] = useState<string | null>(null);
     const [initialLoad, setInitialLoad] = useState(true);
+    const [keyboardHeight, setKeyboardHeight] = useState(0);
+    const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
 
     const [hasMore, setHasMore] = useState(true);
 
@@ -77,14 +80,45 @@ const ChatPage: React.FC = () => {
         [chatId]
     );
 
+    // Keyboard event listeners
+    useEffect(() => {
+        const keyboardWillShowListener = Keyboard.addListener(
+            Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow",
+            (e) => {
+                setKeyboardHeight(e.endCoordinates.height);
+                setIsKeyboardVisible(true);
+                // Scroll to bottom when keyboard opens
+                setTimeout(
+                    () => {
+                        flatListRef.current?.scrollToEnd({ animated: true });
+                    },
+                    Platform.OS === "ios" ? 0 : 100
+                );
+            }
+        );
+
+        const keyboardWillHideListener = Keyboard.addListener(
+            Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide",
+            () => {
+                setKeyboardHeight(0);
+                setIsKeyboardVisible(false);
+            }
+        );
+
+        return () => {
+            keyboardWillShowListener?.remove();
+            keyboardWillHideListener?.remove();
+        };
+    }, []);
+
     useEffect(() => {
         if (data) {
             console.log(data.messages[0]);
             setMessages(data.messages);
-
+            // Scroll to bottom after messages load
             setTimeout(() => {
                 flatListRef.current?.scrollToEnd({ animated: false });
-            }, 0);
+            }, 100);
         }
         if (!socket) return;
         socket.emit(ChatEventEnum.JOIN_CHAT_EVENT, chatId);
@@ -108,14 +142,15 @@ const ChatPage: React.FC = () => {
         };
     }, []);
 
+    // Scroll to bottom when messages change and it's initial load
     useEffect(() => {
-        if (initialLoad) {
+        if (initialLoad && messages.length > 0) {
             setTimeout(() => {
                 flatListRef.current?.scrollToEnd({ animated: false });
                 setInitialLoad(false);
-            }, 0);
+            }, 150);
         }
-    }, [messages]);
+    }, []);
 
     const handleTyping = (text: string) => {
         setInput(text);
@@ -159,7 +194,6 @@ const ChatPage: React.FC = () => {
     };
 
     const onNewMessage = (message: Message) => {
-        // console.log("Got message");
         setMessages((prev) => [...prev, message]);
         setTimeout(() => {
             flatListRef.current?.scrollToEnd({ animated: true });
@@ -177,10 +211,14 @@ const ChatPage: React.FC = () => {
         setTypingUser(null);
     };
 
-    const handleScroll = () => {
-        setTimeout(() => {
-            flatListRef.current?.scrollToEnd({ animated: true });
-        }, 0);
+    const handleTextInputFocus = () => {
+        // Scroll to bottom when text input is focused
+        setTimeout(
+            () => {
+                flatListRef.current?.scrollToEnd({ animated: true });
+            },
+            Platform.OS === "ios" ? 300 : 100
+        );
     };
 
     const fetchMessages = async () => {
@@ -205,12 +243,8 @@ const ChatPage: React.FC = () => {
     };
 
     const renderMessage = ({ item, index }: { item: Message; index: number }) => {
-        // Unread divider (first unread message)
-        // const showUnreadDivider = item.unread && (index === 0 || !messages[index - 1]?.unread);
         const showUnreadDivider = false;
-
         const isMe = item.sender._id === user?._id;
-        //console.log(item.sender._id, user);
 
         return (
             <View className="px-4">
@@ -246,6 +280,26 @@ const ChatPage: React.FC = () => {
         );
     };
 
+    // Calculate proper content container padding based on keyboard state
+    const getContentContainerPadding = () => {
+        const baseInputHeight = 80; // Approximate height of input area
+        const additionalPadding = 20;
+
+        if (isKeyboardVisible) {
+            // When keyboard is visible, add extra padding to account for input area
+            return {
+                paddingBottom: baseInputHeight + additionalPadding,
+                paddingTop: 6,
+            };
+        } else {
+            // When keyboard is hidden, use standard padding
+            return {
+                paddingBottom: baseInputHeight + additionalPadding,
+                paddingTop: 6,
+            };
+        }
+    };
+
     return (
         <SafeAreaView className="flex-1 bg-black">
             <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
@@ -256,11 +310,11 @@ const ChatPage: React.FC = () => {
             >
                 <KeyboardAvoidingView
                     behavior={Platform.OS === "ios" ? "padding" : "height"}
-                    keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
+                    keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
                     style={{ flex: 1 }}
                 >
                     {/* Header */}
-                    <View className="px-4 pt-10 pb-2">
+                    <View className="px-4 pt-10 pb-1">
                         <Header
                             dropdownOptions={menuOptions}
                             title={chatName}
@@ -269,17 +323,22 @@ const ChatPage: React.FC = () => {
                     </View>
 
                     {/* Messages */}
-                    <FlatList
-                        ref={flatListRef}
-                        data={messages}
-                        keyExtractor={(m) => m._id}
-                        renderItem={renderMessage}
-                        showsVerticalScrollIndicator={false}
-                        contentContainerStyle={{ paddingBottom: 96, paddingTop: 6 }}
-                        // onScrollToTop={handleTopScroll}
-                        onScroll={handleTopScroll}
-                        scrollEventThrottle={16}
-                    />
+                    <View style={{ flex: 1 }}>
+                        <FlatList
+                            ref={flatListRef}
+                            data={messages}
+                            keyExtractor={(m) => m._id}
+                            renderItem={renderMessage}
+                            showsVerticalScrollIndicator={false}
+                            contentContainerStyle={getContentContainerPadding()}
+                            onScroll={handleTopScroll}
+                            scrollEventThrottle={16}
+                            maintainVisibleContentPosition={{
+                                minIndexForVisible: 0,
+                                autoscrollToTopThreshold: 10,
+                            }}
+                        />
+                    </View>
 
                     {/* Input Dock */}
                     <View className="px-4 pb-4">
@@ -295,7 +354,6 @@ const ChatPage: React.FC = () => {
                                 </TouchableOpacity>
 
                                 {/* Input */}
-
                                 <View className="flex-1">
                                     <TextInput
                                         className="text-white text-base px-3 py-2"
@@ -303,9 +361,9 @@ const ChatPage: React.FC = () => {
                                         placeholderTextColor="#7dd3fc99"
                                         value={input}
                                         onChangeText={handleTyping}
+                                        onFocus={handleTextInputFocus}
                                         multiline
                                         maxLength={4000}
-                                        onPress={handleScroll}
                                     />
                                 </View>
 

@@ -8,6 +8,10 @@ const registerUser = (data: { email: string; password: string; username: string 
     return apiClient.post("/users/register", data);
 };
 
+const currentUser = () => {
+    return apiClient.get("/users/current-user");
+};
+
 const logoutUser = () => {
     return apiClient.post("/users/logout");
 };
@@ -79,6 +83,7 @@ export {
     addParticipantToGroup,
     createGroupChat,
     createUserChat,
+    currentUser,
     deleteGroup,
     deleteMessage,
     deleteOneOnOneChat,

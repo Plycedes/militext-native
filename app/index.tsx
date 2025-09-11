@@ -98,7 +98,8 @@ const AllChatsPage: React.FC = () => {
     useFocusEffect(
         useCallback(() => {
             refetch();
-        }, [refetch])
+            console.log("Refetching");
+        }, [socket])
     );
 
     const onNewMessage = async () => {
