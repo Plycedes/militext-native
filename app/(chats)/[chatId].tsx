@@ -35,7 +35,6 @@ const ChatPage: React.FC = () => {
     const [typingUser, setTypingUser] = useState<string | null>(null);
     const [initialLoad, setInitialLoad] = useState(true);
 
-    const [before, setBefore] = useState<string | null>(null);
     const [hasMore, setHasMore] = useState(true);
 
     const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -80,6 +79,7 @@ const ChatPage: React.FC = () => {
 
     useEffect(() => {
         if (data) {
+            console.log(data.messages[0]);
             setMessages(data.messages);
 
             setTimeout(() => {
@@ -183,23 +183,23 @@ const ChatPage: React.FC = () => {
         }, 0);
     };
 
-    const fetchMessages = async (beforeId?: string) => {
+    const fetchMessages = async () => {
         const response = await getChatMessages(chatId, messages[0]._id);
         const res = response.data.data as MessagesResponse;
         if (res.messages.length > 0) {
             setMessages((prev) => [...res.messages, ...prev]);
             setHasMore(res.hasMore);
         }
+        console.log(`Last message: ${messages[0].content}`);
     };
 
     const handleTopScroll = ({ nativeEvent }: any) => {
-        if (nativeEvent.contentOffset.y <= 0 && hasMore && before) {
+        if (nativeEvent.contentOffset.y <= 0 && hasMore) {
             if (debounceRef.current) {
                 clearTimeout(debounceRef.current);
             }
             debounceRef.current = setTimeout(() => {
-                console.log("Fetching older messages before:", before);
-                fetchMessages(before);
+                fetchMessages();
             }, 300);
         }
     };
