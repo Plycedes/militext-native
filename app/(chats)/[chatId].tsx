@@ -150,7 +150,7 @@ const ChatPage: React.FC = () => {
                 setInitialLoad(false);
             }, 150);
         }
-    }, []);
+    }, [messages, initialLoad]);
 
     const handleTyping = (text: string) => {
         setInput(text);
@@ -306,7 +306,7 @@ const ChatPage: React.FC = () => {
 
             <LinearGradient
                 colors={["#0a0a0a", "#1a0a2e", "#16213e", "#0f3460"]}
-                className="flex-1 pb-10"
+                className="flex-1"
             >
                 <KeyboardAvoidingView
                     behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -314,7 +314,7 @@ const ChatPage: React.FC = () => {
                     style={{ flex: 1 }}
                 >
                     {/* Header */}
-                    <View className="px-4 pt-10 pb-1">
+                    <View className="px-4 pt-10 pb-2">
                         <Header
                             dropdownOptions={menuOptions}
                             title={chatName}
@@ -333,10 +333,6 @@ const ChatPage: React.FC = () => {
                             contentContainerStyle={getContentContainerPadding()}
                             onScroll={handleTopScroll}
                             scrollEventThrottle={16}
-                            maintainVisibleContentPosition={{
-                                minIndexForVisible: 0,
-                                autoscrollToTopThreshold: 10,
-                            }}
                         />
                     </View>
 
