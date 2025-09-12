@@ -20,7 +20,7 @@ function useAxios<T>(fn: AsyncFn<T>, id?: string, page = 1, limit = 5) {
             const innerData = response?.data?.data?.data ?? response?.data?.data ?? response?.data;
             setData(innerData as T);
         } catch (error: any) {
-            Alert.alert(error?.message || "Something went wrong");
+            Alert.alert(error?.response.data.message || "Something went wrong");
             if (error?.response?.status === 401 || error?.response?.status === 403) {
                 router.replace("/sign-in");
             }

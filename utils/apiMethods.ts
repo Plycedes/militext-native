@@ -16,6 +16,10 @@ const logoutUser = () => {
     return apiClient.post("/users/logout");
 };
 
+const updateUserPfp = (data: any) => {
+    return apiClient.post("/users/update-avatar", data);
+};
+
 const getCurrentUser = () => {
     return apiClient.get("/users/current-user");
 };
@@ -100,5 +104,6 @@ export {
     resetPassword,
     sendEmail,
     updateGroupName,
+    updateUserPfp,
     verifyEmail,
 };

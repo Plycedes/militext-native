@@ -15,6 +15,7 @@ import {
     Dimensions,
     Easing,
     FlatList,
+    Image,
     SafeAreaView,
     StatusBar,
     Text,
@@ -153,6 +154,10 @@ const AllChatsPage: React.FC = () => {
 
     const renderChatItem = ({ item }: { item: Chat }): JSX.Element => {
         const isUnread = item.userChat.unreadCount > 0;
+        const sender =
+            item.participants[0].username === user?.username
+                ? item.participants[1]
+                : item.participants[0];
 
         return (
             <TouchableOpacity onPress={() => navigateToChat(item)} className="mx-4 mb-3">
@@ -165,21 +170,25 @@ const AllChatsPage: React.FC = () => {
                 >
                     <View className="flex-row items-center">
                         <View
-                            className={`w-12 h-12 rounded-full items-center justify-center border-2 ${
+                            className={`w-12 h-12 rounded-full items-center justify-center border-2 overflow-hidden ${
                                 isUnread
                                     ? "border-yellow-400/70 bg-yellow-400/10"
                                     : "border-cyan-400/70 bg-cyan-400/10"
                             }`}
                         >
-                            <Ionicons
-                                name={item.isGroupChat ? "people-outline" : "person-outline"}
-                                size={24}
-                                color={
-                                    isUnread
-                                        ? "#FFD700" // Gold for unread
-                                        : "#00f6ff"
-                                }
-                            />
+                            {sender.avatar ? (
+                                <Image source={{ uri: sender.avatar }} className="w-12 h-12" />
+                            ) : (
+                                <Ionicons
+                                    name={item.isGroupChat ? "people-outline" : "person-outline"}
+                                    size={24}
+                                    color={
+                                        isUnread
+                                            ? "#FFD700" // Gold for unread
+                                            : "#00f6ff"
+                                    }
+                                />
+                            )}
                         </View>
 
                         {/* Chat Info */}
@@ -187,11 +196,7 @@ const AllChatsPage: React.FC = () => {
                             <View className="flex-row items-center justify-between mb-1">
                                 <View className="flex-row items-center">
                                     <Text className="text-white font-psemibold text-base">
-                                        {item.isGroupChat
-                                            ? item.name
-                                            : item.participants[0].username === user?.username
-                                              ? item.participants[1].username
-                                              : item.participants[0].username}
+                                        {item.isGroupChat ? item.name : sender.username}
                                     </Text>
                                     {item.isGroupChat && (
                                         <View

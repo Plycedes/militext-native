@@ -1,24 +1,31 @@
 import { ConfirmDialog, GlassButton } from "@/components";
+import ProfileImage from "@/components/ProfileImage";
 import { useAuth } from "@/context/AuthContext";
-import useAxios from "@/hooks/useAxios";
-import { UserInterface } from "@/types/misc";
-import { getCurrentUser } from "@/utils/apiMethods";
-import { reactlogo } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useState } from "react";
-import { Animated, Image, SafeAreaView, StatusBar, Text, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+    Animated,
+    Image,
+    SafeAreaView,
+    StatusBar,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
 
 const ProfilePage: React.FC = () => {
     const [dialogVisible, setDialogVisible] = useState(false);
     const [loading, setLoading] = useState<boolean>(false);
+    const [showImg, setShowImg] = useState<boolean>(false);
+
     const fadeAnim = React.useRef(new Animated.Value(0)).current;
     const pulseAnim = React.useRef(new Animated.Value(1)).current;
 
-    const { data: user } = useAxios<UserInterface>(getCurrentUser);
-    const { logout } = useAuth();
+    //const { data: user } = useAxios<UserInterface>(getCurrentUser);
+    const { logout, user, current } = useAuth();
 
-    React.useEffect(() => {
+    useEffect(() => {
         // fade-in page
         Animated.timing(fadeAnim, {
             toValue: 1,
@@ -61,6 +68,9 @@ const ProfilePage: React.FC = () => {
 
     return (
         <SafeAreaView className="flex-1 bg-black">
+            {showImg && user?.avatar && (
+                <ProfileImage image={user.avatar} setShow={setShowImg} refetch={current} />
+            )}
             <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
             <LinearGradient
                 colors={["#0a0a0a", "#1a0a2e", "#16213e", "#0a203bff"]}
@@ -75,12 +85,18 @@ const ProfilePage: React.FC = () => {
                     <View className="items-center mt-12 mb-8">
                         {/* Pulsing Glow Ring */}
 
-                        <View className="w-40 h-40 rounded-full items-center justify-center shadow-lg shadow-cyan-400/80 overflow-hidden">
-                            <Image
-                                source={user?.avatar ? { uri: user.avatar } : reactlogo}
-                                className="w-36 h-36 rounded-full border-2 border-cyan-400/30 backdrop-blur-md"
-                            />
-                        </View>
+                        <TouchableOpacity onPress={() => setShowImg(true)}>
+                            <View className="w-40 h-40 rounded-full items-center justify-center shadow-lg shadow-cyan-400/80 overflow-hidden">
+                                {user?.avatar ? (
+                                    <Image
+                                        source={{ uri: user.avatar }}
+                                        className="w-36 h-36 rounded-full border-2 border-cyan-400/30 backdrop-blur-md"
+                                    />
+                                ) : (
+                                    <Ionicons name="person-outline" size={36} color="#00f6ff" />
+                                )}
+                            </View>
+                        </TouchableOpacity>
 
                         {/* Username */}
                         <Text className="text-white text-3xl font-extrabold mt-6">

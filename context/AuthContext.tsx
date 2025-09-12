@@ -52,9 +52,9 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     const current = async () => {
         try {
             const response = await getCurrentUser();
-            console.log(response.data.data);
-            // setUser(response.data.data);
-            // await LocalStorageAsync.set("user", JSON.stringify(response.data.data));
+            console.log("Data from here", response.data.data);
+            setUser(response.data.data);
+            await LocalStorageAsync.set("user", JSON.stringify(response.data.data));
         } catch (error) {
             console.log("Error occured", error);
         }
@@ -74,7 +74,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         (async () => {
             const _token = await LocalStorageAsync.get("access");
             const _user = await LocalStorageAsync.get("user");
-            console.log(_user);
+            console.log(_token);
             if (_token && _user?._id) {
                 setUser(_user);
                 setToken(_token);

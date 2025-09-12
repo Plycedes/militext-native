@@ -9,6 +9,7 @@ interface SocketContextType {
 
 const getSocket = async () => {
     const token = await LocalStorageAsync.get("access");
+    console.log(token);
 
     return socketio(BASE_SOCKET_URL, {
         withCredentials: true,

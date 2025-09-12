@@ -31,16 +31,16 @@ export default function RootLayout() {
     return (
         <>
             <AuthProvider>
-                <Stack screenOptions={{ headerShown: false }}>
-                    <SocketProvider>
+                <SocketProvider>
+                    <Stack screenOptions={{ headerShown: false }}>
                         <Stack.Screen name="index" options={{ headerShown: false }} />
                         <Stack.Screen name="(chats)" options={{ headerShown: false }} />
                         <Stack.Screen name="(user)" options={{ headerShown: false }} />
-                    </SocketProvider>
 
-                    <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-                </Stack>
-                <StatusBar style="dark" />
+                        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                    </Stack>
+                    <StatusBar style="dark" />
+                </SocketProvider>
             </AuthProvider>
         </>
     );
