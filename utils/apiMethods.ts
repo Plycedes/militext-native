@@ -64,19 +64,20 @@ const getChatMessages = (chatId?: string, before: string = "", limit: number = 2
     return apiClient.get(`/messages/${chatId}?before=${before}&limit=${limit}`);
 };
 
-const sendMessage = (chatId: string, content: string, attachments: File[]) => {
-    const formData = new FormData();
-    if (content) {
-        formData.append("content", content);
-    }
-    attachments?.map((file) => {
-        formData.append("attachments", file);
-    });
-    return apiClient.post(`/messages/${chatId}`, formData);
-};
-
 const deleteMessage = (chatId: string, messageId: string) => {
     return apiClient.delete(`/messages/${chatId}/${messageId}`);
+};
+
+const sendEmail = (email: string) => {
+    return apiClient.post("/emails/send-email", { email });
+};
+
+const verifyEmail = (email: string, code: string) => {
+    return apiClient.post("/emails/verify-email", { email, code });
+};
+
+const resetPassword = (newPassword: string) => {
+    return apiClient.post("/users/reset-password", { newPassword });
 };
 
 export {
@@ -96,6 +97,8 @@ export {
     logoutUser,
     registerUser,
     removeParticipantFromGroup,
-    sendMessage,
+    resetPassword,
+    sendEmail,
     updateGroupName,
+    verifyEmail,
 };

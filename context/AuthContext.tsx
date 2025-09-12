@@ -1,5 +1,5 @@
 import { AuthContextType, UserInterface } from "@/types/misc";
-import { loginUser, logoutUser, registerUser } from "@/utils/apiMethods";
+import { getCurrentUser, loginUser, logoutUser, registerUser } from "@/utils/apiMethods";
 import { LocalStorageAsync } from "@/utils/localstorage";
 import { router } from "expo-router";
 import { createContext, useContext, useEffect, useState } from "react";
@@ -10,6 +10,7 @@ const AuthContext = createContext<AuthContextType>({
     login: async () => {},
     register: async () => {},
     logout: async () => {},
+    current: async () => {},
 });
 
 const useAuth = () => useContext(AuthContext);
@@ -48,6 +49,17 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         }
     };
 
+    const current = async () => {
+        try {
+            const response = await getCurrentUser();
+            console.log(response.data.data);
+            // setUser(response.data.data);
+            // await LocalStorageAsync.set("user", JSON.stringify(response.data.data));
+        } catch (error) {
+            console.log("Error occured", error);
+        }
+    };
+
     const logout = async () => {
         try {
             await logoutUser();
@@ -74,7 +86,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     }, []);
 
     return (
-        <AuthContext.Provider value={{ user, login, register, logout, token }}>
+        <AuthContext.Provider value={{ user, login, register, logout, current, token }}>
             {isLoading ? <div>Loading...</div> : children}
         </AuthContext.Provider>
     );

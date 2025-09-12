@@ -20,6 +20,7 @@ export interface AuthContextType {
         password: string;
     }) => Promise<void>;
     logout: () => Promise<void>;
+    current: () => Promise<void>;
 }
 
 export interface Chat {

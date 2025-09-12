@@ -4,8 +4,8 @@ import reactlogo from "../assets/images/react-logo.png";
 // const BASE_API_URL = "https://militext-backend.onrender.com/api/v1";
 // const BASE_SOCKET_URL = "https://militext-backend.onrender.com";
 
-const BASE_API_URL = "https://e7fef9db2742.ngrok-free.app/api/v1";
-const BASE_SOCKET_URL = "https://e7fef9db2742.ngrok-free.app";
+const BASE_API_URL = "https://30ad17e2d9f1.ngrok-free.app/api/v1";
+const BASE_SOCKET_URL = "https://30ad17e2d9f1.ngrok-free.app";
 
 export const ChatEventEnum = {
     CONNECTED_EVENT: "connected",
