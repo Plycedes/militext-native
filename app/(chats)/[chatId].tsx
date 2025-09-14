@@ -8,7 +8,7 @@ import { getChatMessages } from "@/utils/apiMethods";
 import { ChatEventEnum } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
     Alert,
@@ -25,7 +25,11 @@ import {
 } from "react-native";
 
 const ChatPage: React.FC = () => {
-    const { chatId, chatName } = useLocalSearchParams<{ chatId: string; chatName: string }>();
+    const { chatId, chatName, senderImg } = useLocalSearchParams<{
+        chatId: string;
+        chatName: string;
+        senderImg: string;
+    }>();
     const { user } = useAuth();
     const { socket } = useSocket();
     const { data } = useAxios<MessagesResponse>(getChatMessages, chatId);
@@ -113,7 +117,7 @@ const ChatPage: React.FC = () => {
 
     useEffect(() => {
         if (data) {
-            console.log(data.messages[0]);
+            console.log(data);
             setMessages(data.messages);
             // Scroll to bottom after messages load
             setTimeout(() => {
@@ -319,6 +323,9 @@ const ChatPage: React.FC = () => {
                             dropdownOptions={menuOptions}
                             title={chatName}
                             subtitle={typingUser ? `${typingUser} is typing...` : ""}
+                            showBack={true}
+                            handleBack={() => router.back()}
+                            imageUri={senderImg}
                         />
                     </View>
 

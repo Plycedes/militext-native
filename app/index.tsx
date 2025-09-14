@@ -163,15 +163,13 @@ const AllChatsPage: React.FC = () => {
 
     const navigateToChat = (chat: Chat): void => {
         const chatId = chat._id;
-        const name = chat.isGroupChat
-            ? chat.name
-            : chat.participants[0]._id === user?._id
-              ? chat.participants[1].username
-              : chat.participants[0].username;
+        const sender =
+            chat.participants[0]._id === user?._id ? chat.participants[1] : chat.participants[0];
+
         console.log(`Navigate to chat: ${chatId}`);
         router.push({
             pathname: `/${chatId}` as RelativePathString,
-            params: { chatName: name },
+            params: { chatName: sender.username, senderImg: sender.avatar },
         });
     };
 

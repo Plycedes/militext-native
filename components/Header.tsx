@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import React, { useRef, useState } from "react";
-import { Animated, Easing, Text, TouchableOpacity, View } from "react-native";
+import { Animated, Easing, Image, Text, TouchableOpacity, View } from "react-native";
 
 export type DropdownOption = {
     id: string;
@@ -11,11 +11,21 @@ export type DropdownOption = {
 
 interface HeaderProps {
     title: string;
-    subtitle: string;
+    subtitle?: string;
     dropdownOptions: DropdownOption[];
+    showBack?: boolean;
+    handleBack?: () => void;
+    imageUri?: string;
 }
 
-const Header: React.FC<HeaderProps> = ({ title, subtitle, dropdownOptions }) => {
+const Header: React.FC<HeaderProps> = ({
+    title,
+    subtitle,
+    dropdownOptions,
+    showBack,
+    handleBack,
+    imageUri,
+}) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownHeight = useRef(new Animated.Value(0)).current;
 
@@ -44,11 +54,28 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle, dropdownOptions }) => 
         <View className="">
             {/* Title + Menu */}
             <View className="flex-row items-center justify-between mb-4">
-                <View>
-                    <Text className="text-2xl font-pbold text-white">{title}</Text>
-                    <Text className="text-cyan-300 text-sm font-pregular opacity-80">
-                        {subtitle}
-                    </Text>
+                <View className="flex-row gap-1 items-center">
+                    {showBack && (
+                        <Ionicons
+                            name="arrow-back"
+                            size={24}
+                            color="#00d4ff"
+                            onPress={handleBack}
+                        />
+                    )}
+                    {imageUri && (
+                        <View className="w-12 h-12 rounded-full items-center justify-center border-2 overflow-hidden">
+                            <Image source={{ uri: imageUri }} className="w-12 h-12" />
+                        </View>
+                    )}
+                    <View>
+                        <Text className="text-2xl font-pbold text-white">{title}</Text>
+                        {subtitle && (
+                            <Text className="text-cyan-300 text-sm font-pregular opacity-80">
+                                {subtitle}
+                            </Text>
+                        )}
+                    </View>
                 </View>
 
                 <TouchableOpacity
