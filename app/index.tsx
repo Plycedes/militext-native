@@ -127,7 +127,7 @@ const AllChatsPage: React.FC = () => {
     const filteredChats = chats.filter((chat) => {
         const matchesSearch =
             chat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            chat.lastMessage.content.toLowerCase().includes(searchQuery.toLowerCase());
+            chat.lastMessage?.content.toLowerCase().includes(searchQuery.toLowerCase());
 
         if (selectedFilter === "individual") return matchesSearch && !chat.isGroupChat;
         if (selectedFilter === "groups") return matchesSearch && chat.isGroupChat;
@@ -220,7 +220,7 @@ const AllChatsPage: React.FC = () => {
                             </View>
 
                             <Text className="text-gray-300 font-pregular text-sm" numberOfLines={1}>
-                                {item.lastMessage.content}
+                                {item.lastMessage?.content}
                             </Text>
                         </View>
 

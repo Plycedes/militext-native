@@ -119,6 +119,7 @@ const CreateChatPage: React.FC = () => {
                 const numbers = participants.map((p) => p.number);
                 await createGroupChat({ name: chatName, participants: numbers });
             }
+            setParticipants([{ id: "1", number: "", isValid: false }]);
             Alert.alert("Chat created");
         } catch (error) {
             console.log(error);

@@ -1,5 +1,6 @@
 import { GlassButton, InputField } from "@/components";
 import { useAuth } from "@/context/AuthContext";
+import { checkEmail, checkNumber, checkUsername } from "@/utils/apiMethods";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
@@ -31,6 +32,10 @@ const SignUpPage: React.FC = () => {
         confirmPassword: "",
     });
     const [isLoading, setIsLoading] = useState<boolean>(false);
+
+    const [usernameErr, setUsernameErr] = useState<string | undefined>(undefined);
+    const [numberErr, setNumberErr] = useState<string | undefined>(undefined);
+    const [emailErr, setEmailErr] = useState<string | undefined>(undefined);
 
     const { register } = useAuth();
 
@@ -67,6 +72,49 @@ const SignUpPage: React.FC = () => {
 
     const navigateToSignIn = (): void => {
         router.push("/sign-in");
+    };
+
+    const handleUsernameChange = async (): Promise<void> => {
+        try {
+            const response = await checkUsername(formData.username);
+            const available = response.data.data.available;
+            if (available) {
+                setUsernameErr(undefined);
+            } else {
+                setUsernameErr("Username not available");
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const handleNumberChange = async (): Promise<void> => {
+        try {
+            const response = await checkNumber(formData.number);
+            const available = response.data.data.available;
+            if (available) {
+                console.log(available);
+                setNumberErr(undefined);
+            } else {
+                setNumberErr("Number not available");
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const handleEmailChange = async (): Promise<void> => {
+        try {
+            const response = await checkEmail(formData.email);
+            const available = response.data.data.available;
+            if (available) {
+                setEmailErr(undefined);
+            } else {
+                setEmailErr("Email not available");
+            }
+        } catch (error) {
+            console.log(error);
+        }
     };
 
     return (
@@ -116,6 +164,8 @@ const SignUpPage: React.FC = () => {
                             secured={false}
                             bottomMargin="mb-4"
                             handleInputChange={handleInputChange}
+                            checkAvailability={handleEmailChange}
+                            error={emailErr}
                         />
 
                         {/* Username Input */}
@@ -125,11 +175,13 @@ const SignUpPage: React.FC = () => {
                             keyId="username"
                             value={formData.username}
                             placeholder="netrunner69"
-                            keyboardType="default"
+                            keyboardType="email-address"
                             autoComplete="username"
                             secured={false}
                             bottomMargin="mb-4"
                             handleInputChange={handleInputChange}
+                            checkAvailability={handleUsernameChange}
+                            error={usernameErr}
                         />
 
                         <InputField
@@ -139,10 +191,12 @@ const SignUpPage: React.FC = () => {
                             value={formData.number}
                             placeholder="000000000"
                             keyboardType="number-pad"
-                            autoComplete="tel"
+                            autoComplete="tel-national"
                             secured={false}
                             bottomMargin="mb-4"
                             handleInputChange={handleInputChange}
+                            checkAvailability={handleNumberChange}
+                            error={numberErr}
                         />
 
                         {/* Password Input */}

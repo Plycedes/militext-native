@@ -31,6 +31,6 @@ export interface Chat {
     admin: string;
     createdAt: Date;
     updatedAt: Date;
-    lastMessage: Message;
+    lastMessage?: Message;
     userChat: UserChat;
 }

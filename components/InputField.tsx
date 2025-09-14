@@ -14,10 +14,12 @@ interface InputFieldTypes {
     value: string;
     placeholder: string;
     keyboardType: KeyboardTypeOptions;
-    autoComplete: "password" | "email" | "username" | "tel" | "sms-otp";
+    autoComplete: "password" | "email" | "username" | "tel" | "sms-otp" | "tel-national";
     secured: boolean;
     bottomMargin: string;
+    error?: string;
     handleInputChange: (key: string, value: string) => void;
+    checkAvailability?: () => void;
 }
 
 const InputField: React.FC<InputFieldTypes> = ({
@@ -30,7 +32,9 @@ const InputField: React.FC<InputFieldTypes> = ({
     autoComplete,
     secured,
     bottomMargin,
+    error,
     handleInputChange,
+    checkAvailability,
 }) => {
     const [showValue, setShowValue] = useState<boolean>(false);
     return (
@@ -48,6 +52,7 @@ const InputField: React.FC<InputFieldTypes> = ({
                     keyboardType={keyboardType}
                     autoComplete={autoComplete}
                     autoCapitalize="none"
+                    onEndEditing={checkAvailability}
                 />
                 {secured && (
                     <TouchableOpacity onPress={() => setShowValue(!showValue)} className="ml-2 p-1">
@@ -59,6 +64,9 @@ const InputField: React.FC<InputFieldTypes> = ({
                     </TouchableOpacity>
                 )}
             </View>
+            {error && (
+                <Text className="mt-1 ml-2 text-red-500 font-pregular text-sm">Error: {error}</Text>
+            )}
         </View>
     );
 };

@@ -84,8 +84,23 @@ const resetPassword = (newPassword: string) => {
     return apiClient.post("/users/reset-password", { newPassword });
 };
 
+const checkUsername = (username: string) => {
+    return apiClient.get(`/users/check-username/${username}`);
+};
+
+const checkNumber = (number: string) => {
+    return apiClient.get(`/users/check-number/${number}`);
+};
+
+const checkEmail = (email: string) => {
+    return apiClient.get(`/users/check-email/${email}`);
+};
+
 export {
     addParticipantToGroup,
+    checkEmail,
+    checkNumber,
+    checkUsername,
     createGroupChat,
     createUserChat,
     currentUser,
