@@ -36,7 +36,7 @@ const createUserChat = (receiverId: string) => {
     return apiClient.post(`/chats/c/${receiverId}`);
 };
 
-const createGroupChat = (data: { name: string; participants: string[] }) => {
+const createGroupChat = (data: { name: string; numbers: string[] }) => {
     return apiClient.post(`/chats/group`, data);
 };
 
@@ -96,6 +96,14 @@ const checkEmail = (email: string) => {
     return apiClient.get(`/users/check-email/${email}`);
 };
 
+const promotToAdmin = (chatId: string, userId: string) => {
+    return apiClient.post("/chats/group/promote", { chatId, userId });
+};
+
+const demoteFromAdmin = (chatId: string, userId: string) => {
+    return apiClient.post("/chats/group/demote", { chatId, userId });
+};
+
 export {
     addParticipantToGroup,
     checkEmail,
@@ -107,6 +115,7 @@ export {
     deleteGroup,
     deleteMessage,
     deleteOneOnOneChat,
+    demoteFromAdmin,
     getAvailableUsers,
     getChatMessages,
     getCurrentUser,
@@ -114,6 +123,7 @@ export {
     getUserChats,
     loginUser,
     logoutUser,
+    promotToAdmin,
     registerUser,
     removeParticipantFromGroup,
     resetPassword,

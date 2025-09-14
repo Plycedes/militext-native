@@ -1,4 +1,4 @@
-import { GlassButton, Header } from "@/components";
+import { ConfirmDialog, GlassButton, Header } from "@/components";
 import { useAuth } from "@/context/AuthContext";
 import { useSocket } from "@/context/SocketContext";
 import useAxios from "@/hooks/useAxios";
@@ -31,11 +31,13 @@ const AllChatsPage: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [isSearchVisible, setIsSearchVisible] = useState<boolean>(false);
     const [selectedFilter, setSelectedFilter] = useState<"all" | "individual" | "groups">("all");
+    const [dialogVisible, setDialogVisible] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
 
     const searchOpacity = useRef(new Animated.Value(0)).current;
 
     const { socket } = useSocket();
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
 
     const [chats, setChats] = useState<Chat[]>([]);
 
@@ -61,23 +63,23 @@ const AllChatsPage: React.FC = () => {
             action: () => router.push("/profile"),
         },
         {
-            id: "settings",
-            label: "Grid Settings",
+            id: "logout",
+            label: "Logout",
             icon: "settings-outline",
-            action: () => console.log("Settings opened"),
+            action: () => handleLogoutClick(),
         },
-        {
-            id: "archived",
-            label: "Data Vault",
-            icon: "archive-outline",
-            action: () => console.log("Archived chats"),
-        },
-        {
-            id: "security",
-            label: "Security Protocols",
-            icon: "shield-outline",
-            action: () => console.log("Security settings"),
-        },
+        // {
+        //     id: "archived",
+        //     label: "Data Vault",
+        //     icon: "archive-outline",
+        //     action: () => console.log("Archived chats"),
+        // },
+        // {
+        //     id: "security",
+        //     label: "Security Protocols",
+        //     icon: "shield-outline",
+        //     action: () => console.log("Security settings"),
+        // },
     ];
 
     useEffect(() => {
@@ -124,10 +126,31 @@ const AllChatsPage: React.FC = () => {
         });
     };
 
+    const handleLogoutClick = () => {
+        setDialogVisible(true);
+    };
+
+    const handleLogout = async () => {
+        try {
+            setLoading(true);
+            await logout();
+        } catch (error: any) {
+            console.log(error.response.data.message);
+        } finally {
+            setLoading(false);
+            setDialogVisible(false);
+        }
+    };
+
     const filteredChats = chats.filter((chat) => {
+        const sender = !chat.isGroupChat
+            ? chat.participants[0].username === user?.username
+                ? chat.participants[1]
+                : chat.participants[0]
+            : null;
         const matchesSearch =
             chat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            chat.lastMessage?.content.toLowerCase().includes(searchQuery.toLowerCase());
+            sender?.username.toLowerCase().includes(searchQuery.toLowerCase());
 
         if (selectedFilter === "individual") return matchesSearch && !chat.isGroupChat;
         if (selectedFilter === "groups") return matchesSearch && chat.isGroupChat;
@@ -332,6 +355,14 @@ const AllChatsPage: React.FC = () => {
                     icon={<Ionicons name="add" size={28} color="white" />}
                     title=""
                     position="absolute bottom-12 right-6"
+                />
+
+                <ConfirmDialog
+                    visible={dialogVisible}
+                    title="Confirm Logout"
+                    message="Are you sure you want to disconnect from the Grid?"
+                    onCancel={() => setDialogVisible(false)}
+                    onConfirm={handleLogout}
                 />
             </LinearGradient>
         </SafeAreaView>

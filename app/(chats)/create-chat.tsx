@@ -117,7 +117,7 @@ const CreateChatPage: React.FC = () => {
                 await createUserChat(participants[0].number);
             } else {
                 const numbers = participants.map((p) => p.number);
-                await createGroupChat({ name: chatName, participants: numbers });
+                await createGroupChat({ name: chatName, numbers });
             }
             setParticipants([{ id: "1", number: "", isValid: false }]);
             Alert.alert("Chat created");
@@ -320,7 +320,7 @@ const CreateChatPage: React.FC = () => {
 
                         {/* Button */}
                         <GlassButton
-                            title="Connect to Grid"
+                            title="Establish Connection"
                             onPress={handleCreateChat}
                             isLoading={isLoading}
                         />
