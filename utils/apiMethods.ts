@@ -84,16 +84,16 @@ const resetPassword = (newPassword: string) => {
     return apiClient.post("/users/reset-password", { newPassword });
 };
 
-const checkUsername = (username: string) => {
-    return apiClient.get(`/users/check-username/${username}`);
+const checkUsername = (username: string, verified: boolean = false) => {
+    return apiClient.get(`/users${verified ? "/v" : ""}/check-username/${username}`);
 };
 
-const checkNumber = (number: string) => {
-    return apiClient.get(`/users/check-number/${number}`);
+const checkNumber = (number: string, verified: boolean = false) => {
+    return apiClient.get(`/users${verified ? "/v" : ""}/check-number/${number}`);
 };
 
-const checkEmail = (email: string) => {
-    return apiClient.get(`/users/check-email/${email}`);
+const checkEmail = (email: string, verified: boolean = false) => {
+    return apiClient.get(`/users${verified ? "/v" : ""}/check-email/${email}`);
 };
 
 const promotToAdmin = (chatId: string, userId: string) => {
@@ -102,6 +102,10 @@ const promotToAdmin = (chatId: string, userId: string) => {
 
 const demoteFromAdmin = (chatId: string, userId: string) => {
     return apiClient.post("/chats/group/demote", { chatId, userId });
+};
+
+const updateUser = (data: any) => {
+    return apiClient.post("/users/update", data);
 };
 
 export {
@@ -129,6 +133,7 @@ export {
     resetPassword,
     sendEmail,
     updateGroupName,
+    updateUser,
     updateUserPfp,
     verifyEmail,
 };
