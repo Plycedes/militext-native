@@ -4,8 +4,11 @@ import reactlogo from "../assets/images/react-logo.png";
 // const BASE_API_URL = "https://militext-backend.onrender.com/api/v1";
 // const BASE_SOCKET_URL = "https://militext-backend.onrender.com";
 
-const BASE_API_URL = "https://30ad17e2d9f1.ngrok-free.app/api/v1";
-const BASE_SOCKET_URL = "https://30ad17e2d9f1.ngrok-free.app";
+const BASE_API_URL = "https://ec79a2465330.ngrok-free.app/api/v1";
+const BASE_SOCKET_URL = "https://ec79a2465330.ngrok-free.app";
+
+// const BASE_API_URL = "http://localhost:8000/api/v1";
+// const BASE_SOCKET_URL = "http://localhost:8000";
 
 export const ChatEventEnum = {
     CONNECTED_EVENT: "connected",
@@ -20,6 +23,7 @@ export const ChatEventEnum = {
     TYPING_EVENT: "typing",
     MESSAGE_DELETE_EVENT: "messageDeleted",
     NEW_MESSAGE_EVENT: "newMessage",
+    SOCEKT_CONNECT_ERROR: "connectError",
 } as const;
 
 export { BASE_API_URL, BASE_SOCKET_URL, reactlogo };
