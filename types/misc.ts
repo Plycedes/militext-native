@@ -5,6 +5,8 @@ export interface UserInterface {
     avatar?: string;
     username: string;
     email?: string;
+    number?: string;
+    bio?: string;
     createdAt?: string;
     updatedAt?: string;
 }

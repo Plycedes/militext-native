@@ -21,18 +21,14 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     const [token, setToken] = useState<string | null>(null);
 
     const login = async (data: { username: string; password: string }) => {
-        try {
-            const response = await loginUser(data);
-            const res = response.data;
-            setUser(res.data.user);
-            setToken(res.data.accessToken);
-            await LocalStorageAsync.set("user", JSON.stringify(res.data.user));
-            await LocalStorageAsync.set("access", res.data.accessToken);
-            await LocalStorageAsync.set("refresh", res.data.accessToken);
-            router.replace("/");
-        } catch (error: any) {
-            console.log("Error occured", error);
-        }
+        const response = await loginUser(data);
+        const res = response.data;
+        setUser(res.data.user);
+        setToken(res.data.accessToken);
+        await LocalStorageAsync.set("user", JSON.stringify(res.data.user));
+        await LocalStorageAsync.set("access", res.data.accessToken);
+        await LocalStorageAsync.set("refresh", res.data.accessToken);
+        router.replace("/");
     };
 
     const register = async (data: {
@@ -41,32 +37,20 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         number: string;
         password: string;
     }) => {
-        try {
-            await registerUser(data);
-            router.replace("/sign-in");
-        } catch (error: any) {
-            console.log("Error occured", error);
-        }
+        await registerUser(data);
+        router.replace("/sign-in");
     };
 
     const current = async () => {
-        try {
-            const response = await getCurrentUser();
-            console.log("Data from here", response.data.data);
-            setUser(response.data.data);
-            await LocalStorageAsync.set("user", JSON.stringify(response.data.data));
-        } catch (error) {
-            console.log("Error occured", error);
-        }
+        const response = await getCurrentUser();
+        console.log("Data from here", response.data.data);
+        setUser(response.data.data);
+        await LocalStorageAsync.set("user", JSON.stringify(response.data.data));
     };
 
     const logout = async () => {
-        try {
-            await logoutUser();
-            router.replace("/sign-in");
-        } catch (error: any) {
-            console.log("Error occured", error);
-        }
+        await logoutUser();
+        router.replace("/sign-in");
     };
 
     useEffect(() => {

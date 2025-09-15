@@ -27,6 +27,7 @@ const PasswordModal: React.FC<PasswordModalProps> = ({ visible, onCancel, onConf
                         placeholderTextColor="#22d3ee55"
                         value={password}
                         onChangeText={setPassword}
+                        autoCapitalize="none"
                         className="text-white font-pmedium text-lg border-b border-cyan-400 focus:border-cyan-300 mb-8 pb-1"
                     />
 

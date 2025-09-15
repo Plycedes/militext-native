@@ -44,6 +44,7 @@ const SignInPage: React.FC = () => {
         try {
             setIsLoading(true);
             await login(formData);
+            Vibration.vibrate(100);
         } catch (error) {
             console.log(error);
         } finally {
