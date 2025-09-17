@@ -14,6 +14,7 @@ import {
     Vibration,
     View,
 } from "react-native";
+import Toast from "react-native-toast-message";
 
 interface LoginData {
     username: string;
@@ -45,8 +46,14 @@ const SignInPage: React.FC = () => {
             setIsLoading(true);
             await login(formData);
             Vibration.vibrate(100);
-        } catch (error) {
-            console.log(error);
+            router.replace("/");
+        } catch (error: any) {
+            if (error.response.status === 400) {
+                Toast.show({
+                    type: "success",
+                    text1: "Username or password incorrect",
+                });
+            }
         } finally {
             setIsLoading(false);
         }

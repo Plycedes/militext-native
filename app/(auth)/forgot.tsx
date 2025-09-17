@@ -96,6 +96,8 @@ const ForgotPasswordScreen = () => {
             await resetPassword(formData.password);
             Alert.alert("Success", "Password has been reset!");
             router.replace("/sign-in");
+        } catch (error: any) {
+            console.log(error);
         } finally {
             setIsLoading(false);
         }

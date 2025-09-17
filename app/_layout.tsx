@@ -4,9 +4,22 @@ import { useFonts } from "expo-font";
 import { SplashScreen, Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
+import { Text, View } from "react-native";
+import Toast, { ToastConfig, ToastConfigParams } from "react-native-toast-message";
 import "../global.css";
 
 SplashScreen.preventAutoHideAsync();
+
+const customToastConfig: ToastConfig = {
+    success: ({ text1, text2 }: ToastConfigParams<any>) => (
+        <View className="flex-row bg-gray-600 p-3 rounded-full max-w-[80%] justify-center items-center">
+            <View>
+                <Text className="text-white font-semibold">{text1}</Text>
+                {text2 ? <Text className="text-gray-300">{text2}</Text> : null}
+            </View>
+        </View>
+    ),
+};
 
 export default function RootLayout() {
     const [fontsLoaded, error] = useFonts({
@@ -40,6 +53,7 @@ export default function RootLayout() {
                         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
                     </Stack>
                     <StatusBar style="dark" />
+                    <Toast config={customToastConfig} position="bottom" />
                 </SocketProvider>
             </AuthProvider>
         </>

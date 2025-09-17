@@ -22,13 +22,13 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 
     const login = async (data: { username: string; password: string }) => {
         const response = await loginUser(data);
+        console.log("Test");
         const res = response.data;
         setUser(res.data.user);
         setToken(res.data.accessToken);
         await LocalStorageAsync.set("user", JSON.stringify(res.data.user));
         await LocalStorageAsync.set("access", res.data.accessToken);
         await LocalStorageAsync.set("refresh", res.data.accessToken);
-        router.replace("/");
     };
 
     const register = async (data: {
