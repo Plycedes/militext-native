@@ -1,9 +1,10 @@
 import { GlassButton } from "@/components";
 import { createGroupChat, createUserChat } from "@/utils/apiMethods";
 import { Ionicons } from "@expo/vector-icons";
+import * as Contacts from "expo-contacts";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
-import React, { JSX, useRef, useState } from "react";
+import React, { JSX, useEffect, useRef, useState } from "react";
 import {
     Alert,
     Animated,
@@ -34,6 +35,10 @@ const CreateChatPage: React.FC = () => {
     ]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
+    const [contacts, setContacts] = useState<Contacts.Contact[]>([]);
+    const [filteredContacts, setFilteredContacts] = useState<{ [key: string]: Contacts.Contact[] }>(
+        {}
+    );
 
     const slideAnimation = useRef(new Animated.Value(0)).current;
 
@@ -41,6 +46,18 @@ const CreateChatPage: React.FC = () => {
         const phoneRegex = /^\+?[\d\s\-\(\)]{10,15}$/;
         return phoneRegex.test(number.trim());
     };
+
+    useEffect(() => {
+        (async () => {
+            const { status } = await Contacts.requestPermissionsAsync();
+            if (status === "granted") {
+                const { data } = await Contacts.getContactsAsync({
+                    fields: [Contacts.Fields.Name, Contacts.Fields.PhoneNumbers],
+                });
+                setContacts(data);
+            }
+        })();
+    }, []);
 
     const handleModeChange = (mode: ChatMode): void => {
         setChatMode(mode);
@@ -53,18 +70,34 @@ const CreateChatPage: React.FC = () => {
         }).start();
     };
 
-    const updateParticipant = (id: string, number: string): void => {
+    const updateParticipant = (id: string, value: string): void => {
         setParticipants((prev) =>
             prev.map((p) =>
-                p.id === id ? { ...p, number, isValid: validatePhoneNumber(number) } : p
+                p.id === id ? { ...p, number: value, isValid: validatePhoneNumber(value) } : p
             )
         );
+
+        // Reset errors if needed
         if (errors[id]) {
             setErrors((prev) => {
                 const newErrors = { ...prev };
                 delete newErrors[id];
                 return newErrors;
             });
+        }
+
+        // Filter contacts by name or number
+        if (value.trim()) {
+            const results = contacts.filter((c) => {
+                const nameMatch = c.name?.toLowerCase().includes(value.toLowerCase());
+                const phoneMatch = c.phoneNumbers?.some((ph: any) =>
+                    ph.number.replace(/\s+/g, "").includes(value.replace(/\s+/g, ""))
+                );
+                return nameMatch || phoneMatch;
+            });
+            setFilteredContacts((prev) => ({ ...prev, [id]: results }));
+        } else {
+            setFilteredContacts((prev) => ({ ...prev, [id]: [] }));
         }
     };
 
@@ -163,8 +196,7 @@ const CreateChatPage: React.FC = () => {
                     placeholderTextColor="#38bdf8"
                     value={p.number}
                     onChangeText={(v) => updateParticipant(p.id, v)}
-                    keyboardType="phone-pad"
-                    autoComplete="tel"
+                    keyboardType="default"
                 />
                 <TouchableOpacity onPress={() => handleScanQR(p.id)} className="ml-2 p-1">
                     <Ionicons name="qr-code-outline" size={20} color="#0ef" />
@@ -177,6 +209,29 @@ const CreateChatPage: React.FC = () => {
                     />
                 )}
             </LinearGradient>
+            {filteredContacts[p.id]?.length > 0 && (
+                <View className="bg-gray-900 border border-cyan-500/40 rounded-lg mt-1">
+                    {filteredContacts[p.id].slice(0, 5).map((c) => (
+                        <TouchableOpacity
+                            key={c.id}
+                            onPress={() => {
+                                const number = c.phoneNumbers?.[0]?.number || "";
+                                updateParticipant(p.id, number);
+                                setFilteredContacts((prev) => ({ ...prev, [p.id]: [] })); // close dropdown
+                            }}
+                            className="px-3 py-2 border-b border-cyan-500/20"
+                        >
+                            <Text className="text-cyan-100">{c.name}</Text>
+                            {c.phoneNumbers?.[0] && (
+                                <Text className="text-cyan-400 text-xs">
+                                    {c.phoneNumbers[0].number}
+                                </Text>
+                            )}
+                        </TouchableOpacity>
+                    ))}
+                </View>
+            )}
+
             {errors[p.id] && <Text className="text-red-400 text-xs mt-1 ml-1">{errors[p.id]}</Text>}
         </View>
     );
@@ -276,6 +331,7 @@ const CreateChatPage: React.FC = () => {
                                         placeholderTextColor="#38bdf8"
                                         value={chatName}
                                         onChangeText={setChatName}
+                                        keyboardType="default"
                                     />
                                 </LinearGradient>
                                 {errors.chatName && (
