@@ -8,7 +8,7 @@ import { getChatMessages } from "@/utils/apiMethods";
 import { ChatEventEnum } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { router, useLocalSearchParams } from "expo-router";
+import { RelativePathString, router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
     Alert,
@@ -25,10 +25,11 @@ import {
 } from "react-native";
 
 const ChatPage: React.FC = () => {
-    const { chatId, chatName, senderImg } = useLocalSearchParams<{
+    const { chatId, chatName, senderImg, isGroupChat } = useLocalSearchParams<{
         chatId: string;
         chatName: string;
         senderImg: string;
+        isGroupChat: string;
     }>();
     const { user } = useAuth();
     const { socket } = useSocket();
@@ -56,29 +57,29 @@ const ChatPage: React.FC = () => {
                 icon: "search-outline",
                 action: () => Alert.alert("Neural Search", "Scanning knowledge lattice…"),
             },
-            {
-                id: "media",
-                label: "Media Vault",
-                icon: "images-outline",
-                action: () => Alert.alert("Media Vault", "Opening archive…"),
-            },
+            // {
+            //     id: "media",
+            //     label: "Media Vault",
+            //     icon: "images-outline",
+            //     action: () => Alert.alert("Media Vault", "Opening archive…"),
+            // },
             {
                 id: "mute",
                 label: "Silence Node",
                 icon: "volume-mute-outline",
                 action: () => Alert.alert("Silenced", "Notifications muted for this channel."),
             },
-            {
-                id: "secure",
-                label: "Secure Link",
-                icon: "shield-checkmark-outline",
-                action: () => Alert.alert("Secure Link", "Quantum handshake complete."),
-            },
+            // {
+            //     id: "secure",
+            //     label: "Secure Link",
+            //     icon: "shield-checkmark-outline",
+            //     action: () => Alert.alert("Secure Link", "Quantum handshake complete."),
+            // },
             {
                 id: "details",
                 label: "Channel Details",
                 icon: "information-circle-outline",
-                action: () => Alert.alert("Channel", `Channel ID: ${chatId ?? "N/A"}`),
+                action: () => handleChatDetails(),
             },
         ],
         [chatId]
@@ -301,6 +302,20 @@ const ChatPage: React.FC = () => {
                 paddingBottom: baseInputHeight + additionalPadding,
                 paddingTop: 6,
             };
+        }
+    };
+
+    const handleChatDetails = () => {
+        if (isGroupChat === "true") {
+            router.push({
+                pathname: `/groupinfo` as RelativePathString,
+                params: { chatId },
+            });
+        } else {
+            router.push({
+                pathname: `/chatinfo` as RelativePathString,
+                params: { chatId },
+            });
         }
     };
 

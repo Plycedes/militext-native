@@ -28,9 +28,13 @@ export interface Chat {
     name: string;
     isGroupChat: boolean;
     participants: UserInterface[];
-    admin: string;
+    admin: string[];
     createdAt: Date;
     updatedAt: Date;
     lastMessage?: Message;
     userChat: UserChat;
+    messageCount: number;
+    commonGroupCount: number;
+    friendshipLevel: number;
+    friendshipLabel: string;
 }

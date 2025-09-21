@@ -44,6 +44,10 @@ const getGroupInfo = (chatId: string) => {
     return apiClient.get(`/chats/group/${chatId}`);
 };
 
+const getSingleInfo = (id?: string) => {
+    return apiClient.get(`chats/c/${id}`);
+};
+
 const updateGroupName = (chatId: string, name: string) => {
     return apiClient.patch(`/chats/group/${chatId}`, { name });
 };
@@ -124,6 +128,7 @@ export {
     getChatMessages,
     getCurrentUser,
     getGroupInfo,
+    getSingleInfo,
     getUserChats,
     loginUser,
     logoutUser,

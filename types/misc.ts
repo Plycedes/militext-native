@@ -7,7 +7,7 @@ export interface UserInterface {
     email?: string;
     number?: string;
     bio?: string;
-    createdAt?: string;
+    createdAt: string;
     updatedAt?: string;
 }
 

@@ -169,7 +169,11 @@ const AllChatsPage: React.FC = () => {
         console.log(`Navigate to chat: ${chatId}`);
         router.push({
             pathname: `/${chatId}` as RelativePathString,
-            params: { chatName: sender.username, senderImg: sender.avatar },
+            params: {
+                chatName: sender.username,
+                senderImg: sender.avatar,
+                isGroupChat: chat.isGroupChat ? "true" : "false",
+            },
         });
     };
 
