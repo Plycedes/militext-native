@@ -20,7 +20,8 @@ import {
 
 interface Participant {
     id: string;
-    number: string;
+    number: string; // always the phone number we’ll send to backend
+    display: string; // name (if from contacts) or number (if manually typed)
     name?: string;
     isValid: boolean;
 }
@@ -31,8 +32,9 @@ const CreateChatPage: React.FC = () => {
     const [chatMode, setChatMode] = useState<ChatMode>("individual");
     const [chatName, setChatName] = useState<string>("");
     const [participants, setParticipants] = useState<Participant[]>([
-        { id: "1", number: "", isValid: false },
+        { id: "1", number: "", display: "", isValid: false },
     ]);
+
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [contacts, setContacts] = useState<Contacts.Contact[]>([]);
@@ -61,7 +63,7 @@ const CreateChatPage: React.FC = () => {
 
     const handleModeChange = (mode: ChatMode): void => {
         setChatMode(mode);
-        setParticipants([{ id: "1", number: "", isValid: false }]);
+        setParticipants([{ id: "1", number: "", display: "", isValid: false }]);
         setChatName("");
         setErrors({});
         Animated.spring(slideAnimation, {
@@ -72,12 +74,32 @@ const CreateChatPage: React.FC = () => {
 
     const updateParticipant = (id: string, value: string): void => {
         setParticipants((prev) =>
-            prev.map((p) =>
-                p.id === id ? { ...p, number: value, isValid: validatePhoneNumber(value) } : p
-            )
+            prev.map((p) => {
+                // If user is editing after selecting a contact
+                if (p.id === id && p.name && value !== p.name) {
+                    return {
+                        ...p,
+                        number: value, // treat input as raw text again
+                        display: value,
+                        name: undefined, // clear saved contact name
+                        isValid: validatePhoneNumber(value),
+                    };
+                }
+
+                // Normal case (manual entry)
+                if (p.id === id) {
+                    return {
+                        ...p,
+                        number: value,
+                        display: value,
+                        isValid: validatePhoneNumber(value),
+                    };
+                }
+
+                return p;
+            })
         );
 
-        // Reset errors if needed
         if (errors[id]) {
             setErrors((prev) => {
                 const newErrors = { ...prev };
@@ -86,7 +108,7 @@ const CreateChatPage: React.FC = () => {
             });
         }
 
-        // Filter contacts by name or number
+        // filter contacts if typing
         if (value.trim()) {
             const results = contacts.filter((c) => {
                 const nameMatch = c.name?.toLowerCase().includes(value.toLowerCase());
@@ -107,7 +129,10 @@ const CreateChatPage: React.FC = () => {
             return;
         }
         const newId = Date.now().toString();
-        setParticipants((prev) => [...prev, { id: newId, number: "", isValid: false }]);
+        setParticipants((prev) => [
+            ...prev,
+            { id: newId, number: "", display: "", isValid: false },
+        ]);
     };
 
     const removeParticipant = (id: string): void => {
@@ -152,7 +177,7 @@ const CreateChatPage: React.FC = () => {
                 const numbers = participants.map((p) => p.number);
                 await createGroupChat({ name: chatName, numbers });
             }
-            setParticipants([{ id: "1", number: "", isValid: false }]);
+            setParticipants([{ id: "1", number: "", display: "", isValid: false }]);
             Alert.alert("Chat created");
         } catch (error) {
             console.log(error);
@@ -192,12 +217,14 @@ const CreateChatPage: React.FC = () => {
                 <Ionicons name="call-outline" size={20} color={p.isValid ? "#0f0" : "#0ef"} />
                 <TextInput
                     className="flex-1 ml-3 text-cyan-100 text-base"
-                    placeholder="+1234567890"
+                    placeholder="Contact name or number"
                     placeholderTextColor="#38bdf8"
-                    value={p.number}
+                    value={p.display}
                     onChangeText={(v) => updateParticipant(p.id, v)}
                     keyboardType="default"
+                    autoComplete="tel"
                 />
+
                 <TouchableOpacity onPress={() => handleScanQR(p.id)} className="ml-2 p-1">
                     <Ionicons name="qr-code-outline" size={20} color="#0ef" />
                 </TouchableOpacity>
@@ -216,8 +243,20 @@ const CreateChatPage: React.FC = () => {
                             key={c.id}
                             onPress={() => {
                                 const number = c.phoneNumbers?.[0]?.number || "";
-                                updateParticipant(p.id, number);
-                                setFilteredContacts((prev) => ({ ...prev, [p.id]: [] })); // close dropdown
+                                setParticipants((prev) =>
+                                    prev.map((p) =>
+                                        p.id === p.id
+                                            ? {
+                                                  ...p,
+                                                  number, // backend-safe number
+                                                  display: c.name, // show name
+                                                  name: c.name, // track original name
+                                                  isValid: validatePhoneNumber(number),
+                                              }
+                                            : p
+                                    )
+                                );
+                                setFilteredContacts((prev) => ({ ...prev, [p.id]: [] }));
                             }}
                             className="px-3 py-2 border-b border-cyan-500/20"
                         >
