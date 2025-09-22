@@ -2,6 +2,7 @@ import { ConfirmDialog, GlassButton, Header } from "@/components";
 import { useAuth } from "@/context/AuthContext";
 import { useSocket } from "@/context/SocketContext";
 import useAxios from "@/hooks/useAxios";
+import { useFCM } from "@/hooks/useFCM";
 import { DropdownOption } from "@/types/misc";
 import { Chat } from "@/types/responseTypes";
 import { CommonChatAPI } from "@/utils/apiMethods";
@@ -28,6 +29,7 @@ const { width } = Dimensions.get("window");
 
 const AllChatsPage: React.FC = () => {
     const { data, refetch } = useAxios<Chat[]>(CommonChatAPI.getUserChats);
+    const { fcmToken } = useFCM();
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [isSearchVisible, setIsSearchVisible] = useState<boolean>(false);
     const [selectedFilter, setSelectedFilter] = useState<"all" | "individual" | "groups">("all");

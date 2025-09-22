@@ -11,7 +11,15 @@ import dayjs from "dayjs";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Image, Modal, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+    ActivityIndicator,
+    Image,
+    Modal,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
 import Toast from "react-native-toast-message";
 
 const GroupChatInfo = () => {
@@ -27,6 +35,7 @@ const GroupChatInfo = () => {
     const [dropdownVisible, setDropdownVisible] = useState(false);
     const [showAllParticipants, setShowAllParticipants] = useState(false);
     const [addParticipantVisible, setAddParticipantVisible] = useState(false);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
 
     useEffect(() => {
         if (chat) {
@@ -46,10 +55,11 @@ const GroupChatInfo = () => {
         if (!chat || !selectedUser) return;
 
         try {
-            if (option === "remove") {
-                await GroupChatAPI.removeParticipantFromGroup(chat._id, selectedUser._id);
-            } else if (option === "makeAdmin") {
+            setIsLoading(true);
+            if (option === "makeAdmin") {
                 await GroupChatAPI.promotToAdmin(chat._id, selectedUser._id);
+            } else if (option === "remove") {
+                await GroupChatAPI.removeParticipantFromGroup(chat._id, selectedUser._id);
             } else if (option === "removeAdmin") {
                 await GroupChatAPI.demoteFromAdmin(chat._id, selectedUser._id);
             }
@@ -60,7 +70,12 @@ const GroupChatInfo = () => {
             });
             console.log("Success ");
         } catch (error: any) {
-            console.log(error.response.data.message);
+            Toast.show({
+                type: "success",
+                text1: error.response.data.message,
+            });
+        } finally {
+            setIsLoading(false);
         }
 
         setDropdownVisible(false);
@@ -394,30 +409,36 @@ const GroupChatInfo = () => {
                         onPress={() => setDropdownVisible(false)}
                         activeOpacity={1}
                     >
-                        <View className="bg-gray-900 rounded-xl w-64 p-4">
-                            <TouchableOpacity onPress={() => handleOptionSelect("remove")}>
-                                <Text className="text-red-400 text-lg mb-3">
-                                    Remove Participant
-                                </Text>
-                            </TouchableOpacity>
-
-                            {!chat.admin.includes(selectedUser._id) && (
-                                <TouchableOpacity onPress={() => handleOptionSelect("makeAdmin")}>
-                                    <Text className="text-cyan-400 text-lg">Make Admin</Text>
+                        {isLoading ? (
+                            <ActivityIndicator size="small" color="#22d3ee" />
+                        ) : (
+                            <View className="bg-gray-900 rounded-xl w-64 p-4">
+                                <TouchableOpacity onPress={() => handleOptionSelect("remove")}>
+                                    <Text className="text-red-400 text-lg mb-3">
+                                        Remove Participant
+                                    </Text>
                                 </TouchableOpacity>
-                            )}
 
-                            {chat.admin.includes(selectedUser._id) &&
-                                chat.superAdmin !== selectedUser._id && (
+                                {!chat.admin.includes(selectedUser._id) && (
                                     <TouchableOpacity
-                                        onPress={() => handleOptionSelect("removeAdmin")}
+                                        onPress={() => handleOptionSelect("makeAdmin")}
                                     >
-                                        <Text className="text-yellow-400 text-lg">
-                                            Remove Admin
-                                        </Text>
+                                        <Text className="text-cyan-400 text-lg">Make Admin</Text>
                                     </TouchableOpacity>
                                 )}
-                        </View>
+
+                                {chat.admin.includes(selectedUser._id) &&
+                                    chat.superAdmin !== selectedUser._id && (
+                                        <TouchableOpacity
+                                            onPress={() => handleOptionSelect("removeAdmin")}
+                                        >
+                                            <Text className="text-yellow-400 text-lg">
+                                                Remove Admin
+                                            </Text>
+                                        </TouchableOpacity>
+                                    )}
+                            </View>
+                        )}
                     </TouchableOpacity>
                 </Modal>
             )}
