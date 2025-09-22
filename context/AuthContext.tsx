@@ -1,5 +1,5 @@
 import { AuthContextType, UserInterface } from "@/types/misc";
-import { getCurrentUser, loginUser, logoutUser, registerUser } from "@/utils/apiMethods";
+import { AuthAPI, UserAPI } from "@/utils/apiMethods";
 import { LocalStorageAsync } from "@/utils/localstorage";
 import { router } from "expo-router";
 import { createContext, useContext, useEffect, useState } from "react";
@@ -21,7 +21,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     const [token, setToken] = useState<string | null>(null);
 
     const login = async (data: { username: string; password: string }) => {
-        const response = await loginUser(data);
+        const response = await AuthAPI.loginUser(data);
         console.log("Test");
         const res = response.data;
         setUser(res.data.user);
@@ -37,19 +37,19 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => 
         number: string;
         password: string;
     }) => {
-        await registerUser(data);
+        await AuthAPI.registerUser(data);
         router.replace("/sign-in");
     };
 
     const current = async () => {
-        const response = await getCurrentUser();
+        const response = await UserAPI.currentUser();
         console.log("Data from here", response.data.data);
         setUser(response.data.data);
         await LocalStorageAsync.set("user", JSON.stringify(response.data.data));
     };
 
     const logout = async () => {
-        await logoutUser();
+        await AuthAPI.logoutUser();
         router.replace("/sign-in");
     };
 

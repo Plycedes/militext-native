@@ -1,144 +1,119 @@
 import { apiClient } from "./apiClient";
 
-const loginUser = (data: { username: string; password: string }) => {
-    return apiClient.post("/users/login", data);
-};
+class AuthAPI {
+    static loginUser = (data: { username: string; password: string }) => {
+        return apiClient.post("/users/login", data);
+    };
 
-const registerUser = (data: { email: string; password: string; username: string }) => {
-    return apiClient.post("/users/register", data);
-};
+    static registerUser = (data: { email: string; password: string; username: string }) => {
+        return apiClient.post("/users/register", data);
+    };
 
-const currentUser = () => {
-    return apiClient.get("/users/current-user");
-};
+    static resetPassword = (newPassword: string) => {
+        return apiClient.post("/users/reset-password", { newPassword });
+    };
 
-const logoutUser = () => {
-    return apiClient.post("/users/logout");
-};
+    static logoutUser = () => {
+        return apiClient.post("/users/logout");
+    };
 
-const updateUserPfp = (data: any) => {
-    return apiClient.post("/users/update-avatar", data);
-};
+    static sendEmail = (email: string) => {
+        return apiClient.post("/emails/send-email", { email });
+    };
 
-const getCurrentUser = () => {
-    return apiClient.get("/users/current-user");
-};
+    static verifyEmail = (email: string, code: string) => {
+        return apiClient.post("/emails/verify-email", { email, code });
+    };
+}
 
-const getAvailableUsers = () => {
-    return apiClient.get("/chats/users");
-};
+class UserAPI {
+    static checkUsername = (username: string, verified: boolean = false) => {
+        return apiClient.get(`/users${verified ? "/v" : ""}/check-username/${username}`);
+    };
 
-const getUserChats = () => {
-    return apiClient.get(`/chats`);
-};
+    static checkNumber = (number: string, verified: boolean = false) => {
+        return apiClient.get(`/users${verified ? "/v" : ""}/check-number/${number}`);
+    };
 
-const createUserChat = (receiverId: string) => {
-    return apiClient.post(`/chats/c/${receiverId}`);
-};
+    static checkEmail = (email: string, verified: boolean = false) => {
+        return apiClient.get(`/users${verified ? "/v" : ""}/check-email/${email}`);
+    };
 
-const createGroupChat = (data: { name: string; numbers: string[] }) => {
-    return apiClient.post(`/chats/group`, data);
-};
+    static currentUser = () => {
+        return apiClient.get("/users/current-user");
+    };
 
-const getGroupInfo = (id?: string) => {
-    return apiClient.get(`/chats/group/${id}`);
-};
+    static updateUserPfp = (data: any) => {
+        return apiClient.post("/users/update-avatar", data);
+    };
 
-const getSingleInfo = (id?: string) => {
-    return apiClient.get(`chats/c/${id}`);
-};
+    static updateUser = (data: any) => {
+        return apiClient.post("/users/update", data);
+    };
+}
 
-const updateGroupName = (chatId: string, name: string) => {
-    return apiClient.patch(`/chats/group/${chatId}`, { name });
-};
+class MessageAPI {
+    static getChatMessages = (chatId?: string, before: string = "", limit: number = 20) => {
+        return apiClient.get(`/messages/${chatId}?before=${before}&limit=${limit}`);
+    };
 
-const deleteGroup = (chatId: string) => {
-    return apiClient.delete(`/chats/group/${chatId}`);
-};
+    static deleteMessage = (chatId: string, messageId: string) => {
+        return apiClient.delete(`/messages/${chatId}/${messageId}`);
+    };
+}
 
-const deleteOneOnOneChat = (chatId: string) => {
-    return apiClient.delete(`/chats/remove/${chatId}`);
-};
+class CommonChatAPI {
+    static getUserChats = () => {
+        return apiClient.get(`/chats`);
+    };
+}
 
-const addParticipantToGroup = (chatId: string, participantId: string) => {
-    return apiClient.post(`/chats/group/${chatId}/${participantId}`);
-};
+class SingleChatAPI {
+    static createUserChat = (receiverId: string) => {
+        return apiClient.post(`/chats/c/${receiverId}`);
+    };
 
-const removeParticipantFromGroup = (chatId: string, participantId: string) => {
-    return apiClient.delete(`/chats/group/${chatId}/${participantId}`);
-};
+    static getSingleInfo = (id?: string) => {
+        return apiClient.get(`chats/c/${id}`);
+    };
 
-const getChatMessages = (chatId?: string, before: string = "", limit: number = 20) => {
-    return apiClient.get(`/messages/${chatId}?before=${before}&limit=${limit}`);
-};
+    static deleteOneOnOneChat = (chatId: string) => {
+        return apiClient.delete(`/chats/remove/${chatId}`);
+    };
+}
 
-const deleteMessage = (chatId: string, messageId: string) => {
-    return apiClient.delete(`/messages/${chatId}/${messageId}`);
-};
+class GroupChatAPI {
+    static createGroupChat = (data: { name: string; numbers: string[] }) => {
+        return apiClient.post(`/chats/group`, data);
+    };
 
-const sendEmail = (email: string) => {
-    return apiClient.post("/emails/send-email", { email });
-};
+    static addParticipantToGroup = (chatId: string, participantId: string) => {
+        return apiClient.post(`/chats/group/${chatId}/${participantId}`);
+    };
 
-const verifyEmail = (email: string, code: string) => {
-    return apiClient.post("/emails/verify-email", { email, code });
-};
+    static removeParticipantFromGroup = (chatId: string, participantId: string) => {
+        return apiClient.delete(`/chats/group/${chatId}/${participantId}`);
+    };
 
-const resetPassword = (newPassword: string) => {
-    return apiClient.post("/users/reset-password", { newPassword });
-};
+    static promotToAdmin = (chatId: string, userId: string) => {
+        return apiClient.post("/chats/group/promote", { chatId, userId });
+    };
 
-const checkUsername = (username: string, verified: boolean = false) => {
-    return apiClient.get(`/users${verified ? "/v" : ""}/check-username/${username}`);
-};
+    static demoteFromAdmin = (chatId: string, userId: string) => {
+        return apiClient.post("/chats/group/demote", { chatId, userId });
+    };
 
-const checkNumber = (number: string, verified: boolean = false) => {
-    return apiClient.get(`/users${verified ? "/v" : ""}/check-number/${number}`);
-};
+    static updateGroupName = (chatId: string, name: string) => {
+        return apiClient.patch(`/chats/group/${chatId}`, { name });
+    };
 
-const checkEmail = (email: string, verified: boolean = false) => {
-    return apiClient.get(`/users${verified ? "/v" : ""}/check-email/${email}`);
-};
+    static deleteGroup = (chatId: string) => {
+        return apiClient.delete(`/chats/group/${chatId}`);
+    };
 
-const promotToAdmin = (chatId: string, userId: string) => {
-    return apiClient.post("/chats/group/promote", { chatId, userId });
-};
+    static getGroupInfo = (id?: string) => {
+        return apiClient.get(`/chats/group/${id}`);
+    };
+}
 
-const demoteFromAdmin = (chatId: string, userId: string) => {
-    return apiClient.post("/chats/group/demote", { chatId, userId });
-};
-
-const updateUser = (data: any) => {
-    return apiClient.post("/users/update", data);
-};
-
-export {
-    addParticipantToGroup,
-    checkEmail,
-    checkNumber,
-    checkUsername,
-    createGroupChat,
-    createUserChat,
-    currentUser,
-    deleteGroup,
-    deleteMessage,
-    deleteOneOnOneChat,
-    demoteFromAdmin,
-    getAvailableUsers,
-    getChatMessages,
-    getCurrentUser,
-    getGroupInfo,
-    getSingleInfo,
-    getUserChats,
-    loginUser,
-    logoutUser,
-    promotToAdmin,
-    registerUser,
-    removeParticipantFromGroup,
-    resetPassword,
-    sendEmail,
-    updateGroupName,
-    updateUser,
-    updateUserPfp,
-    verifyEmail,
-};
+export { AuthAPI, CommonChatAPI, GroupChatAPI, MessageAPI, SingleChatAPI, UserAPI };

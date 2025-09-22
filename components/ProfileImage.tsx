@@ -1,4 +1,4 @@
-import { updateUserPfp } from "@/utils/apiMethods";
+import { UserAPI } from "@/utils/apiMethods";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import React, { useState } from "react";
@@ -44,7 +44,7 @@ const ProfileImage: React.FC<ProfileImageProps> = ({ image, setShow, refetch }) 
                 type: selectedImage.type || "image/jpeg",
             } as any);
             console.log("Formdata", formData.get("avatar"));
-            await updateUserPfp(formData);
+            await UserAPI.updateUserPfp(formData);
             console.log("Done1");
             await refetch();
             console.log("Done2");

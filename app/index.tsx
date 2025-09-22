@@ -4,7 +4,7 @@ import { useSocket } from "@/context/SocketContext";
 import useAxios from "@/hooks/useAxios";
 import { DropdownOption } from "@/types/misc";
 import { Chat } from "@/types/responseTypes";
-import { getUserChats } from "@/utils/apiMethods";
+import { CommonChatAPI } from "@/utils/apiMethods";
 import { ChatEventEnum } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -27,7 +27,7 @@ import {
 const { width } = Dimensions.get("window");
 
 const AllChatsPage: React.FC = () => {
-    const { data, refetch } = useAxios<Chat[]>(getUserChats);
+    const { data, refetch } = useAxios<Chat[]>(CommonChatAPI.getUserChats);
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [isSearchVisible, setIsSearchVisible] = useState<boolean>(false);
     const [selectedFilter, setSelectedFilter] = useState<"all" | "individual" | "groups">("all");

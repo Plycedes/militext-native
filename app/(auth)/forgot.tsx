@@ -1,6 +1,6 @@
 import GlassButton from "@/components/GlassButton";
 import InputField from "@/components/InputField";
-import { resetPassword, sendEmail, verifyEmail } from "@/utils/apiMethods";
+import { AuthAPI } from "@/utils/apiMethods";
 import { LocalStorageAsync } from "@/utils/localstorage";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -63,7 +63,7 @@ const ForgotPasswordScreen = () => {
         if (!formData.email) return Alert.alert("Error", "Enter your email first.");
         setIsLoading(true);
         try {
-            await sendEmail(formData.email);
+            await AuthAPI.sendEmail(formData.email);
             setStep("code");
         } finally {
             setIsLoading(false);
@@ -74,7 +74,7 @@ const ForgotPasswordScreen = () => {
         if (!formData.code) return Alert.alert("Error", "Enter the code.");
         setIsLoading(true);
         try {
-            const res = await verifyEmail(formData.email, formData.code);
+            const res = await AuthAPI.verifyEmail(formData.email, formData.code);
             await LocalStorageAsync.set("access", res.data.data.reset_token);
             setStep("reset");
         } catch (error: any) {
@@ -93,7 +93,7 @@ const ForgotPasswordScreen = () => {
         }
         setIsLoading(true);
         try {
-            await resetPassword(formData.password);
+            await AuthAPI.resetPassword(formData.password);
             Alert.alert("Success", "Password has been reset!");
             router.replace("/sign-in");
         } catch (error: any) {

@@ -3,7 +3,7 @@ import PasswordModal from "@/components/PasswordModal";
 import ProfileImage from "@/components/ProfileImage";
 import UnderlinedInput from "@/components/UnderlinedInput";
 import { useAuth } from "@/context/AuthContext";
-import { checkEmail, checkNumber, checkUsername, updateUser } from "@/utils/apiMethods";
+import { UserAPI } from "@/utils/apiMethods";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useMemo, useState } from "react";
@@ -89,7 +89,7 @@ const ProfilePage: React.FC = () => {
             const payload = { ...updates, password };
 
             console.log("Saving:", payload);
-            await updateUser(payload);
+            await UserAPI.updateUser(payload);
             await current();
         } catch (error: any) {
             console.log(error.response?.data?.message || error.message);
@@ -101,7 +101,7 @@ const ProfilePage: React.FC = () => {
 
     const handleUsernameChange = async (): Promise<void> => {
         try {
-            const response = await checkUsername(formData.username, true);
+            const response = await UserAPI.checkUsername(formData.username, true);
             const available = response.data.data.available;
             if (available) {
                 setUsernameErr(undefined);
@@ -115,7 +115,7 @@ const ProfilePage: React.FC = () => {
 
     const handleNumberChange = async (): Promise<void> => {
         try {
-            const response = await checkNumber(formData.number, true);
+            const response = await UserAPI.checkNumber(formData.number, true);
             const available = response.data.data.available;
             if (available) {
                 console.log(available);
@@ -130,7 +130,7 @@ const ProfilePage: React.FC = () => {
 
     const handleEmailChange = async (): Promise<void> => {
         try {
-            const response = await checkEmail(formData.email, true);
+            const response = await UserAPI.checkEmail(formData.email, true);
             const available = response.data.data.available;
             if (available) {
                 setEmailErr(undefined);

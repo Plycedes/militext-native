@@ -4,7 +4,7 @@ import { useSocket } from "@/context/SocketContext";
 import useAxios from "@/hooks/useAxios";
 import { DropdownOption } from "@/types/misc";
 import { Message, MessagesResponse } from "@/types/responseTypes";
-import { getChatMessages } from "@/utils/apiMethods";
+import { MessageAPI } from "@/utils/apiMethods";
 import { ChatEventEnum } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -33,7 +33,7 @@ const ChatPage: React.FC = () => {
     }>();
     const { user } = useAuth();
     const { socket } = useSocket();
-    const { data } = useAxios<MessagesResponse>(getChatMessages, chatId);
+    const { data } = useAxios<MessagesResponse>(MessageAPI.getChatMessages, chatId);
 
     const [input, setInput] = useState<string>("");
     const [messages, setMessages] = useState<Message[]>([]);
@@ -227,7 +227,7 @@ const ChatPage: React.FC = () => {
     };
 
     const fetchMessages = async () => {
-        const response = await getChatMessages(chatId, messages[0]._id);
+        const response = await MessageAPI.getChatMessages(chatId, messages[0]._id);
         const res = response.data.data as MessagesResponse;
         if (res.messages.length > 0) {
             setMessages((prev) => [...res.messages, ...prev]);

@@ -1,5 +1,5 @@
 import { GlassButton } from "@/components";
-import { createGroupChat, createUserChat } from "@/utils/apiMethods";
+import { GroupChatAPI, SingleChatAPI } from "@/utils/apiMethods";
 import { Ionicons } from "@expo/vector-icons";
 import * as Contacts from "expo-contacts";
 import { LinearGradient } from "expo-linear-gradient";
@@ -172,10 +172,10 @@ const CreateChatPage: React.FC = () => {
         try {
             setIsLoading(true);
             if (chatMode === "individual") {
-                await createUserChat(participants[0].number);
+                await SingleChatAPI.createUserChat(participants[0].number);
             } else {
                 const numbers = participants.map((p) => p.number);
-                await createGroupChat({ name: chatName, numbers });
+                await GroupChatAPI.createGroupChat({ name: chatName, numbers });
             }
             setParticipants([{ id: "1", number: "", display: "", isValid: false }]);
             Alert.alert("Chat created");

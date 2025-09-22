@@ -1,6 +1,6 @@
 import { GlassButton, InputField } from "@/components";
 import { useAuth } from "@/context/AuthContext";
-import { checkEmail, checkNumber, checkUsername } from "@/utils/apiMethods";
+import { UserAPI } from "@/utils/apiMethods";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
@@ -76,7 +76,7 @@ const SignUpPage: React.FC = () => {
 
     const handleUsernameChange = async (): Promise<void> => {
         try {
-            const response = await checkUsername(formData.username);
+            const response = await UserAPI.checkUsername(formData.username);
             const available = response.data.data.available;
             if (available) {
                 setUsernameErr(undefined);
@@ -90,7 +90,7 @@ const SignUpPage: React.FC = () => {
 
     const handleNumberChange = async (): Promise<void> => {
         try {
-            const response = await checkNumber(formData.number);
+            const response = await UserAPI.checkNumber(formData.number);
             const available = response.data.data.available;
             if (available) {
                 console.log(available);
@@ -105,7 +105,7 @@ const SignUpPage: React.FC = () => {
 
     const handleEmailChange = async (): Promise<void> => {
         try {
-            const response = await checkEmail(formData.email);
+            const response = await UserAPI.checkEmail(formData.email);
             const available = response.data.data.available;
             if (available) {
                 setEmailErr(undefined);

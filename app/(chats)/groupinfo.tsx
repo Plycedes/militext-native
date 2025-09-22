@@ -4,7 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import useAxios from "@/hooks/useAxios";
 import { UserInterface } from "@/types/misc";
 import { Chat } from "@/types/responseTypes";
-import { getGroupInfo } from "@/utils/apiMethods";
+import { GroupChatAPI } from "@/utils/apiMethods";
 import { Ionicons } from "@expo/vector-icons";
 import dayjs from "dayjs";
 import { LinearGradient } from "expo-linear-gradient";
@@ -28,7 +28,7 @@ const addMembers = async (chatId: string) => {
 
 const GroupChatInfo = () => {
     const { chatId } = useLocalSearchParams<{ chatId: string }>();
-    const { data: chat } = useAxios<Chat>(getGroupInfo, chatId);
+    const { data: chat } = useAxios<Chat>(GroupChatAPI.getGroupInfo, chatId);
     const { user } = useAuth();
     const [groupName, setGroupName] = useState("");
     const [connectedSince, setConnectedSince] = useState<string | null>(null);

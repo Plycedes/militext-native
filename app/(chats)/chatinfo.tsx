@@ -1,7 +1,7 @@
 import useAxios from "@/hooks/useAxios";
 import { UserInterface } from "@/types/misc";
 import { Chat } from "@/types/responseTypes"; // your Chat interface
-import { getSingleInfo } from "@/utils/apiMethods";
+import { SingleChatAPI } from "@/utils/apiMethods";
 import { Ionicons } from "@expo/vector-icons";
 import dayjs from "dayjs";
 import { LinearGradient } from "expo-linear-gradient";
@@ -16,7 +16,7 @@ type Props = {
 
 const OneOnOneChatInfo: React.FC<Props> = () => {
     const { chatId } = useLocalSearchParams<{ chatId: string }>();
-    const { data: chat } = useAxios<Chat>(getSingleInfo, chatId);
+    const { data: chat } = useAxios<Chat>(SingleChatAPI.getSingleInfo, chatId);
     const [participant, setParticipant] = useState<UserInterface | null>(null);
     const [connectedSince, setConnectedSince] = useState<string | null>(null);
 
