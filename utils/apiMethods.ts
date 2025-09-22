@@ -40,8 +40,8 @@ const createGroupChat = (data: { name: string; numbers: string[] }) => {
     return apiClient.post(`/chats/group`, data);
 };
 
-const getGroupInfo = (chatId: string) => {
-    return apiClient.get(`/chats/group/${chatId}`);
+const getGroupInfo = (id?: string) => {
+    return apiClient.get(`/chats/group/${id}`);
 };
 
 const getSingleInfo = (id?: string) => {

@@ -28,7 +28,9 @@ export interface Chat {
     name: string;
     isGroupChat: boolean;
     participants: UserInterface[];
+    avatar?: string;
     admin: string[];
+    superAdmin: string;
     createdAt: Date;
     updatedAt: Date;
     lastMessage?: Message;

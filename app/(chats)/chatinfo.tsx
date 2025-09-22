@@ -14,7 +14,7 @@ type Props = {
     onBack: () => void;
 };
 
-const OneOnOneChatInfo: React.FC<Props> = ({ onBack }) => {
+const OneOnOneChatInfo: React.FC<Props> = () => {
     const { chatId } = useLocalSearchParams<{ chatId: string }>();
     const { data: chat } = useAxios<Chat>(getSingleInfo, chatId);
     const [participant, setParticipant] = useState<UserInterface | null>(null);
@@ -83,6 +83,15 @@ const OneOnOneChatInfo: React.FC<Props> = ({ onBack }) => {
                 );
 
             case "soulmate":
+                return (
+                    <View className="bg-gradient-to-r from-teal-500/20 to-cyan-500/20 px-3 py-1 rounded-full border border-cyan-400/30 ml-2">
+                        <Text className="text-cyan-300 text-xs font-bold">
+                            {label.toUpperCase()}
+                        </Text>
+                    </View>
+                );
+
+            case "inseparable":
                 return (
                     <View className="bg-gradient-to-r from-yellow-500/20 to-amber-500/20 px-3 py-1 rounded-full border border-yellow-400/30 ml-2">
                         <Text className="text-yellow-300 text-xs font-bold">
