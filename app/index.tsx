@@ -170,7 +170,7 @@ const AllChatsPage: React.FC = () => {
         router.push({
             pathname: `/${chatId}` as RelativePathString,
             params: {
-                chatName: sender.username,
+                chatName: chat.isGroupChat ? chat.name : sender.username,
                 senderImg: sender.avatar,
                 isGroupChat: chat.isGroupChat ? "true" : "false",
             },
@@ -223,7 +223,7 @@ const AllChatsPage: React.FC = () => {
                                     <Text className="text-white font-psemibold text-base">
                                         {item.isGroupChat ? item.name : sender.username}
                                     </Text>
-                                    {item.isGroupChat && (
+                                    {/* {item.isGroupChat && (
                                         <View
                                             className={`ml-2 rounded-full px-2 py-0.5 ${
                                                 isUnread ? "bg-yellow-400/20" : "bg-cyan-500/20"
@@ -237,7 +237,7 @@ const AllChatsPage: React.FC = () => {
                                                 {item.participants[0].username}
                                             </Text>
                                         </View>
-                                    )}
+                                    )} */}
                                 </View>
                                 <Text className="text-gray-400 font-pregular text-xs">
                                     {new Date(item.updatedAt).toLocaleString()}

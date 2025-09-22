@@ -1,3 +1,4 @@
+import AddParticipantModal from "@/components/AddParticipantModal";
 import GlassButton from "@/components/GlassButton";
 import UnderlinedInput from "@/components/UnderlinedInput";
 import { useAuth } from "@/context/AuthContext";
@@ -11,24 +12,11 @@ import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Image, Modal, ScrollView, Text, TouchableOpacity, View } from "react-native";
-
-// Placeholder API functions
-const updateGroupName = async (chatId: string, name: string) => {
-    console.log("Updating group name", chatId, name);
-};
-const removeParticipant = async (chatId: string, userId: string) => {
-    console.log("Removing participant", chatId, userId);
-};
-const leaveGroup = async (chatId: string) => {
-    console.log("Leaving group", chatId);
-};
-const addMembers = async (chatId: string) => {
-    console.log("Opening add members flow", chatId);
-};
+import Toast from "react-native-toast-message";
 
 const GroupChatInfo = () => {
     const { chatId } = useLocalSearchParams<{ chatId: string }>();
-    const { data: chat } = useAxios<Chat>(GroupChatAPI.getGroupInfo, chatId);
+    const { data: chat, refetch } = useAxios<Chat>(GroupChatAPI.getGroupInfo, chatId);
     const { user } = useAuth();
     const [groupName, setGroupName] = useState("");
     const [connectedSince, setConnectedSince] = useState<string | null>(null);
@@ -38,6 +26,7 @@ const GroupChatInfo = () => {
     const [editingName, setEditingName] = useState(false);
     const [dropdownVisible, setDropdownVisible] = useState(false);
     const [showAllParticipants, setShowAllParticipants] = useState(false);
+    const [addParticipantVisible, setAddParticipantVisible] = useState(false);
 
     useEffect(() => {
         if (chat) {
@@ -49,21 +38,29 @@ const GroupChatInfo = () => {
     }, [chat]);
 
     const handleUpdateName = async () => {
-        await updateGroupName(chat!._id, groupName);
+        await GroupChatAPI.updateGroupName(chat!._id, groupName);
         setEditingName(false);
     };
 
     const handleOptionSelect = async (option: string) => {
         if (!chat || !selectedUser) return;
 
-        if (option === "remove") {
-            await removeParticipant(chat._id, selectedUser._id);
-        } else if (option === "makeAdmin") {
-            console.log("Making admin", selectedUser._id);
-            // TODO: call API
-        } else if (option === "removeAdmin") {
-            console.log("Removing admin", selectedUser._id);
-            // TODO: call API
+        try {
+            if (option === "remove") {
+                await GroupChatAPI.removeParticipantFromGroup(chat._id, selectedUser._id);
+            } else if (option === "makeAdmin") {
+                await GroupChatAPI.promotToAdmin(chat._id, selectedUser._id);
+            } else if (option === "removeAdmin") {
+                await GroupChatAPI.demoteFromAdmin(chat._id, selectedUser._id);
+            }
+            await refetch();
+            Toast.show({
+                type: "success",
+                text1: "Successful",
+            });
+            console.log("Success ");
+        } catch (error: any) {
+            console.log(error.response.data.message);
         }
 
         setDropdownVisible(false);
@@ -143,12 +140,22 @@ const GroupChatInfo = () => {
 
         return (
             <View className="flex-row justify-between items-center py-3 border-b border-cyan-400/20">
-                <View>
+                <View className="flex-row items-center">
                     <Text className="text-white text-lg font-semibold">{item.username}</Text>
                     {isItemAdmin && (
-                        <Text className="text-cyan-400 text-sm">
-                            {isItemSuperAdmin ? "Super Admin" : "Admin"}
-                        </Text>
+                        <View
+                            className={`flex items-center justify-center h-6 px-2 ml-2 rounded-full ${
+                                isItemSuperAdmin ? "bg-purple-400/20" : "bg-cyan-500/20"
+                            }`}
+                        >
+                            <Text
+                                className={`text-xs font-pmedium ${
+                                    isItemSuperAdmin ? "text-purple-400" : "text-cyan-400"
+                                }`}
+                            >
+                                {isItemSuperAdmin ? "Super Admin" : "Admin"}
+                            </Text>
+                        </View>
                     )}
                 </View>
 
@@ -165,6 +172,17 @@ const GroupChatInfo = () => {
                 )}
             </View>
         );
+    };
+
+    const leaveGroup = async (chatId: string) => {
+        try {
+            await GroupChatAPI.leaveGroup(chatId);
+        } catch (error: any) {
+            Toast.show({
+                type: "success",
+                text1: error.response.data.message,
+            });
+        }
     };
 
     const formatNumber = (num: number | null | undefined): string => {
@@ -349,7 +367,10 @@ const GroupChatInfo = () => {
                 {/* Action buttons - Now outside and below FlatList */}
                 <View className="mt-8">
                     {isAdmin && (
-                        <GlassButton title="Add Members" onPress={() => addMembers(chat._id)} />
+                        <GlassButton
+                            title="Add Members"
+                            onPress={() => setAddParticipantVisible(true)}
+                        />
                     )}
                     <GlassButton
                         title="Leave Group"
@@ -360,7 +381,6 @@ const GroupChatInfo = () => {
                     />
                 </View>
             </ScrollView>
-
             {/* Dropdown Modal */}
             {dropdownVisible && selectedUser && (
                 <Modal
@@ -401,6 +421,12 @@ const GroupChatInfo = () => {
                     </TouchableOpacity>
                 </Modal>
             )}
+            <AddParticipantModal
+                chatId={chat._id}
+                visible={addParticipantVisible}
+                onClose={() => setAddParticipantVisible(false)}
+                refetch={refetch}
+            />
         </LinearGradient>
     );
 };

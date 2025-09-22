@@ -111,6 +111,10 @@ class GroupChatAPI {
         return apiClient.delete(`/chats/group/${chatId}`);
     };
 
+    static leaveGroup = (chatId: string) => {
+        return apiClient.delete(`/leave/group/${chatId}`);
+    };
+
     static getGroupInfo = (id?: string) => {
         return apiClient.get(`/chats/group/${id}`);
     };
