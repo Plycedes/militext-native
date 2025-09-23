@@ -145,7 +145,12 @@ const ProfilePage: React.FC = () => {
     return (
         <SafeAreaView className="flex-1 bg-black">
             {showImg && user?.avatar && (
-                <ProfileImage image={user.avatar} setShow={setShowImg} refetch={current} />
+                <ProfileImage
+                    image={user.avatar}
+                    setShow={setShowImg}
+                    refetch={current}
+                    permission={true}
+                />
             )}
             <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
 

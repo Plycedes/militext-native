@@ -1,3 +1,4 @@
+import { ProfileImage } from "@/components";
 import useAxios from "@/hooks/useAxios";
 import { UserInterface } from "@/types/misc";
 import { Chat } from "@/types/responseTypes"; // your Chat interface
@@ -16,9 +17,10 @@ type Props = {
 
 const OneOnOneChatInfo: React.FC<Props> = () => {
     const { chatId } = useLocalSearchParams<{ chatId: string }>();
-    const { data: chat } = useAxios<Chat>(SingleChatAPI.getSingleInfo, chatId);
+    const { data: chat, refetch } = useAxios<Chat>(SingleChatAPI.getSingleInfo, chatId);
     const [participant, setParticipant] = useState<UserInterface | null>(null);
     const [connectedSince, setConnectedSince] = useState<string | null>(null);
+    const [showImg, setShowImg] = useState<boolean>(false);
 
     useEffect(() => {
         if (chat?.participants[0]) {
@@ -123,6 +125,14 @@ const OneOnOneChatInfo: React.FC<Props> = () => {
 
     return (
         <SafeAreaView className="flex-1 bg-black">
+            {showImg && participant?.avatar && (
+                <ProfileImage
+                    image={participant.avatar}
+                    refetch={refetch}
+                    setShow={setShowImg}
+                    permission={false}
+                />
+            )}
             <LinearGradient
                 colors={["#0a0a0a", "#1a0a2e", "#16213e", "#0a203bff"]}
                 className="flex-1 px-6 py-8"
@@ -150,28 +160,30 @@ const OneOnOneChatInfo: React.FC<Props> = () => {
                             <View className="absolute inset-[-8px] rounded-full border border-cyan-400/30 animate-pulse" />
 
                             {/* Main Avatar */}
-                            <View className="relative">
-                                <Image
-                                    source={{
-                                        uri: participant.avatar || "https://i.pravatar.cc/300",
-                                    }}
-                                    className="w-36 h-36 rounded-full border-4 border-cyan-400/60"
-                                />
-
-                                {/* Scanning Effect */}
-                                <View className="absolute inset-0 rounded-full overflow-hidden">
-                                    <View
-                                        className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-cyan-300 to-transparent animate-pulse"
-                                        style={{ transform: [{ translateY: 70 }] }}
+                            <TouchableOpacity onPress={() => setShowImg(true)}>
+                                <View className="relative">
+                                    <Image
+                                        source={{
+                                            uri: participant.avatar || "https://i.pravatar.cc/300",
+                                        }}
+                                        className="w-36 h-36 rounded-full border-4 border-cyan-400/60"
                                     />
-                                </View>
 
-                                {/* Corner Brackets */}
-                                <View className="absolute -top-2 -left-2 w-4 h-4 border-l-2 border-t-2 border-cyan-300" />
-                                <View className="absolute -top-2 -right-2 w-4 h-4 border-r-2 border-t-2 border-cyan-300" />
-                                <View className="absolute -bottom-2 -left-2 w-4 h-4 border-l-2 border-b-2 border-cyan-300" />
-                                <View className="absolute -bottom-2 -right-2 w-4 h-4 border-r-2 border-b-2 border-cyan-300" />
-                            </View>
+                                    {/* Scanning Effect */}
+                                    <View className="absolute inset-0 rounded-full overflow-hidden">
+                                        <View
+                                            className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-cyan-300 to-transparent animate-pulse"
+                                            style={{ transform: [{ translateY: 70 }] }}
+                                        />
+                                    </View>
+
+                                    {/* Corner Brackets */}
+                                    <View className="absolute -top-2 -left-2 w-4 h-4 border-l-2 border-t-2 border-cyan-300" />
+                                    <View className="absolute -top-2 -right-2 w-4 h-4 border-r-2 border-t-2 border-cyan-300" />
+                                    <View className="absolute -bottom-2 -left-2 w-4 h-4 border-l-2 border-b-2 border-cyan-300" />
+                                    <View className="absolute -bottom-2 -right-2 w-4 h-4 border-r-2 border-b-2 border-cyan-300" />
+                                </View>
+                            </TouchableOpacity>
 
                             {/* Verification Badge */}
                             {/* <View className="absolute -bottom-2 -right-2 bg-cyan-500 rounded-full p-1">

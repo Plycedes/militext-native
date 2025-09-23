@@ -120,6 +120,23 @@ class GroupChatAPI {
         return apiClient.patch(`/chats/group/${chatId}`, { name });
     };
 
+    static updateGroupAvatar = (chatId: string, data: any) => {
+        const formData = new FormData();
+
+        formData.append("avatar", {
+            uri: data.avatar.uri,
+            name: data.avatar.fileName,
+            type: data.avatar.mimeType,
+        } as any);
+
+        console.log("Formdata", formData);
+        return apiClient.post(`/chats/group/${chatId}`, formData, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+    };
+
     static deleteGroup = (chatId: string) => {
         return apiClient.delete(`/chats/group/${chatId}`);
     };

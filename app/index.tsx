@@ -250,7 +250,7 @@ const AllChatsPage: React.FC = () => {
                             </View>
 
                             <Text className="text-gray-300 font-pregular text-sm" numberOfLines={1}>
-                                {item.lastMessage?.content}
+                                {item.lastMessage?.content ?? "Tap to send message"}
                             </Text>
                         </View>
 
