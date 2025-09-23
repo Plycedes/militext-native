@@ -253,7 +253,7 @@ const GroupChatInfo = () => {
                             {chat.avatar ? (
                                 <Image
                                     source={{
-                                        uri: "https://i.pravatar.cc/300",
+                                        uri: chat.avatar,
                                     }}
                                     className="w-36 h-36 rounded-full border-4 border-cyan-400/60"
                                 />

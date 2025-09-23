@@ -2,7 +2,6 @@ import { ConfirmDialog, GlassButton, Header } from "@/components";
 import { useAuth } from "@/context/AuthContext";
 import { useSocket } from "@/context/SocketContext";
 import useAxios from "@/hooks/useAxios";
-import { useFCM } from "@/hooks/useFCM";
 import { DropdownOption } from "@/types/misc";
 import { Chat } from "@/types/responseTypes";
 import { CommonChatAPI } from "@/utils/apiMethods";
@@ -29,7 +28,6 @@ const { width } = Dimensions.get("window");
 
 const AllChatsPage: React.FC = () => {
     const { data, refetch } = useAxios<Chat[]>(CommonChatAPI.getUserChats);
-    const { fcmToken } = useFCM();
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [isSearchVisible, setIsSearchVisible] = useState<boolean>(false);
     const [selectedFilter, setSelectedFilter] = useState<"all" | "individual" | "groups">("all");
@@ -173,7 +171,7 @@ const AllChatsPage: React.FC = () => {
             pathname: `/${chatId}` as RelativePathString,
             params: {
                 chatName: chat.isGroupChat ? chat.name : sender.username,
-                senderImg: sender.avatar,
+                senderImg: chat.isGroupChat ? chat.avatar : sender.avatar,
                 isGroupChat: chat.isGroupChat ? "true" : "false",
             },
         });
@@ -203,18 +201,52 @@ const AllChatsPage: React.FC = () => {
                                     : "border-cyan-400/70 bg-cyan-400/10"
                             }`}
                         >
-                            {sender.avatar ? (
-                                <Image source={{ uri: sender.avatar }} className="w-12 h-12" />
+                            {item.isGroupChat ? (
+                                <View>
+                                    {item.avatar ? (
+                                        <Image
+                                            source={{ uri: item.avatar }}
+                                            className="w-12 h-12"
+                                        />
+                                    ) : (
+                                        <Ionicons
+                                            name={
+                                                item.isGroupChat
+                                                    ? "people-outline"
+                                                    : "person-outline"
+                                            }
+                                            size={24}
+                                            color={
+                                                isUnread
+                                                    ? "#FFD700" // Gold for unread
+                                                    : "#00f6ff"
+                                            }
+                                        />
+                                    )}
+                                </View>
                             ) : (
-                                <Ionicons
-                                    name={item.isGroupChat ? "people-outline" : "person-outline"}
-                                    size={24}
-                                    color={
-                                        isUnread
-                                            ? "#FFD700" // Gold for unread
-                                            : "#00f6ff"
-                                    }
-                                />
+                                <View>
+                                    {sender.avatar ? (
+                                        <Image
+                                            source={{ uri: sender.avatar }}
+                                            className="w-12 h-12"
+                                        />
+                                    ) : (
+                                        <Ionicons
+                                            name={
+                                                item.isGroupChat
+                                                    ? "people-outline"
+                                                    : "person-outline"
+                                            }
+                                            size={24}
+                                            color={
+                                                isUnread
+                                                    ? "#FFD700" // Gold for unread
+                                                    : "#00f6ff"
+                                            }
+                                        />
+                                    )}
+                                </View>
                             )}
                         </View>
 
@@ -367,6 +399,7 @@ const AllChatsPage: React.FC = () => {
                     message="Are you sure you want to disconnect from the Grid?"
                     onCancel={() => setDialogVisible(false)}
                     onConfirm={handleLogout}
+                    loading={loading}
                 />
             </LinearGradient>
         </SafeAreaView>
@@ -374,4 +407,3 @@ const AllChatsPage: React.FC = () => {
 };
 
 export default AllChatsPage;
-

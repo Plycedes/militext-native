@@ -1,6 +1,6 @@
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
-import { Animated, Modal, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Animated, Modal, Text, TouchableOpacity, View } from "react-native";
 
 type ConfirmDialogProps = {
     visible: boolean;
@@ -8,6 +8,7 @@ type ConfirmDialogProps = {
     message: string;
     onConfirm: () => void;
     onCancel: () => void;
+    loading?: boolean;
 };
 
 const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
@@ -16,6 +17,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     message,
     onConfirm,
     onCancel,
+    loading,
 }) => {
     const scale = React.useRef(new Animated.Value(0.8)).current;
     const opacity = React.useRef(new Animated.Value(0)).current;
@@ -53,9 +55,13 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
                                 <TouchableOpacity onPress={onCancel} activeOpacity={0.8}>
                                     <Text className="text-gray-400 font-semibold">Cancel</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity onPress={onConfirm} activeOpacity={0.8}>
-                                    <Text className="text-cyan-400 font-semibold">Confirm</Text>
-                                </TouchableOpacity>
+                                {loading ? (
+                                    <ActivityIndicator size="small" color="#22d3ee" />
+                                ) : (
+                                    <TouchableOpacity onPress={onConfirm} activeOpacity={0.8}>
+                                        <Text className="text-cyan-400 font-semibold">Confirm</Text>
+                                    </TouchableOpacity>
+                                )}
                             </View>
                         </View>
                     </LinearGradient>
