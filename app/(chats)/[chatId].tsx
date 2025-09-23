@@ -1,10 +1,10 @@
-import { Header } from "@/components";
+import { Header, Loader } from "@/components";
 import { useAuth } from "@/context/AuthContext";
 import { useSocket } from "@/context/SocketContext";
 import useAxios from "@/hooks/useAxios";
 import { useImagePicker } from "@/hooks/useImagePicker";
 import { DropdownOption } from "@/types/misc";
-import { Message, MessagesResponse } from "@/types/responseTypes";
+import { Attachment, Message, MessagesResponse } from "@/types/responseTypes";
 import { MessageAPI } from "@/utils/apiMethods";
 import { ChatEventEnum } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
@@ -47,6 +47,8 @@ const ChatPage: React.FC = () => {
     const [keyboardHeight, setKeyboardHeight] = useState(0);
     const [isKeyboardVisible, setIsKeyboardVisible] = useState<boolean>(false);
     const [images, setImages] = useState<ImagePicker.ImagePickerAsset[]>([]);
+
+    const [loading, setLoading] = useState<boolean>(false);
 
     const [hasMore, setHasMore] = useState(true);
 
@@ -184,11 +186,27 @@ const ChatPage: React.FC = () => {
         }, 2000);
     };
 
-    const onSend = (): void => {
+    const onSend = async () => {
         const content: string = input.trim();
         if (!content || !socket) return;
+
+        let attachments: Attachment[] = [];
+
+        if (images.length > 0) {
+            try {
+                setLoading(true);
+                const response = await MessageAPI.uploadAttachments(images);
+                attachments = response.data.data;
+            } catch (error: any) {
+                console.log(error);
+                console.log(error.response.data.message);
+            } finally {
+                setLoading(false);
+            }
+        }
+
         setInput("");
-        socket.emit(ChatEventEnum.NEW_MESSAGE_EVENT, { chatId, content });
+        socket.emit(ChatEventEnum.NEW_MESSAGE_EVENT, { chatId, content, attachments });
 
         setTimeout(() => {
             flatListRef.current?.scrollToEnd({ animated: true });
@@ -205,8 +223,6 @@ const ChatPage: React.FC = () => {
         const picks = await pickMultipleImages();
         if (picks) {
             setImages(picks);
-            const response = await MessageAPI.uploadAttachments(picks);
-            console.log(response.data.data);
         }
     };
 
@@ -286,9 +302,6 @@ const ChatPage: React.FC = () => {
                                   : "border border-cyan-400/30 shadow-cyan-400/20 shadow-md bg-cyan-400/10"
                         }`}
                     >
-                        {/* Text message */}
-                        {item.content ? <Text className="text-white">{item.content}</Text> : null}
-
                         {/* First image preview */}
                         {hasAttachments && (
                             <View className="mt-2 relative">
@@ -306,6 +319,10 @@ const ChatPage: React.FC = () => {
                                 )}
                             </View>
                         )}
+                        {/* Text message */}
+                        {item.content ? (
+                            <Text className="text-white mt-1">{item.content}</Text>
+                        ) : null}
 
                         {/* Timestamp */}
                         <View className={`mt-1 ${isMe ? "items-end" : "items-start"}`}>
@@ -364,7 +381,7 @@ const ChatPage: React.FC = () => {
     return (
         <SafeAreaView className="flex-1 bg-black">
             <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
-
+            <Loader message="Uploading images" visible={loading} />
             <LinearGradient
                 colors={["#0a0a0a", "#1a0a2e", "#16213e", "#0f3460"]}
                 className="flex-1"
