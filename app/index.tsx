@@ -1,4 +1,4 @@
-import { ConfirmDialog, GlassButton, Header } from "@/components";
+import { ConfirmDialog, GlassButton, SimpleHeader } from "@/components";
 import { useAuth } from "@/context/AuthContext";
 import { useSocket } from "@/context/SocketContext";
 import useAxios from "@/hooks/useAxios";
@@ -201,53 +201,24 @@ const AllChatsPage: React.FC = () => {
                                     : "border-cyan-400/70 bg-cyan-400/10"
                             }`}
                         >
-                            {item.isGroupChat ? (
-                                <View>
-                                    {item.avatar ? (
-                                        <Image
-                                            source={{ uri: item.avatar }}
-                                            className="w-12 h-12"
-                                        />
-                                    ) : (
-                                        <Ionicons
-                                            name={
-                                                item.isGroupChat
-                                                    ? "people-outline"
-                                                    : "person-outline"
-                                            }
-                                            size={24}
-                                            color={
-                                                isUnread
-                                                    ? "#FFD700" // Gold for unread
-                                                    : "#00f6ff"
-                                            }
-                                        />
-                                    )}
-                                </View>
-                            ) : (
-                                <View>
-                                    {sender.avatar ? (
-                                        <Image
-                                            source={{ uri: sender.avatar }}
-                                            className="w-12 h-12"
-                                        />
-                                    ) : (
-                                        <Ionicons
-                                            name={
-                                                item.isGroupChat
-                                                    ? "people-outline"
-                                                    : "person-outline"
-                                            }
-                                            size={24}
-                                            color={
-                                                isUnread
-                                                    ? "#FFD700" // Gold for unread
-                                                    : "#00f6ff"
-                                            }
-                                        />
-                                    )}
-                                </View>
-                            )}
+                            <View>
+                                {(item.isGroupChat ? item.avatar : sender.avatar) ? (
+                                    <Image
+                                        source={{
+                                            uri: item.isGroupChat ? item.avatar : sender.avatar,
+                                        }}
+                                        className="w-12 h-12"
+                                    />
+                                ) : (
+                                    <Ionicons
+                                        name={
+                                            item.isGroupChat ? "people-outline" : "person-outline"
+                                        }
+                                        size={24}
+                                        color={isUnread ? "#FFD700" : "#00f6ff"}
+                                    />
+                                )}
+                            </View>
                         </View>
 
                         {/* Chat Info */}
@@ -309,7 +280,7 @@ const AllChatsPage: React.FC = () => {
             >
                 {/* Header */}
                 <View className="px-4 pt-10 pb-2">
-                    <Header
+                    <SimpleHeader
                         title="Neural Channels"
                         subtitle={`${chats.length} active connections`}
                         dropdownOptions={dropdownOptions}

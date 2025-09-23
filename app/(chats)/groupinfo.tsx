@@ -1,6 +1,4 @@
-import AddParticipantModal from "@/components/AddParticipantModal";
-import GlassButton from "@/components/GlassButton";
-import UnderlinedInput from "@/components/UnderlinedInput";
+import { AddParticipantModal, GlassButton, UnderlinedInput } from "@/components";
 import { useAuth } from "@/context/AuthContext";
 import useAxios from "@/hooks/useAxios";
 import { UserInterface } from "@/types/misc";

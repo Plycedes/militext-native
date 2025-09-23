@@ -341,6 +341,7 @@ const ChatPage: React.FC = () => {
                             showBack={true}
                             handleBack={() => router.back()}
                             imageUri={senderImg}
+                            isGroupChat={isGroupChat === "true" ? true : false}
                         />
                     </View>
 

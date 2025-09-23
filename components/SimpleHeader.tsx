@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import React, { useRef, useState } from "react";
-import { Animated, Easing, Image, Text, TouchableOpacity, View } from "react-native";
+import { Animated, Easing, Text, TouchableOpacity, View } from "react-native";
 
 export type DropdownOption = {
     id: string;
@@ -16,17 +16,14 @@ interface HeaderProps {
     showBack?: boolean;
     handleBack?: () => void;
     imageUri?: string;
-    isGroupChat?: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({
+const SimpleHeader: React.FC<HeaderProps> = ({
     title,
     subtitle,
     dropdownOptions,
     showBack,
     handleBack,
-    imageUri,
-    isGroupChat,
 }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownHeight = useRef(new Animated.Value(0)).current;
@@ -65,22 +62,6 @@ const Header: React.FC<HeaderProps> = ({
                             onPress={handleBack}
                         />
                     )}
-                    <View>
-                        {imageUri ? (
-                            <Image
-                                source={{
-                                    uri: imageUri,
-                                }}
-                                className="w-12 h-12"
-                            />
-                        ) : (
-                            <Ionicons
-                                name={isGroupChat ? "people-outline" : "person-outline"}
-                                size={24}
-                                color="#00f6ff"
-                            />
-                        )}
-                    </View>
                     <View>
                         <Text className="text-2xl font-pbold text-white">{title}</Text>
                         {subtitle && (
@@ -122,4 +103,4 @@ const Header: React.FC<HeaderProps> = ({
     );
 };
 
-export default Header;
+export default SimpleHeader;
