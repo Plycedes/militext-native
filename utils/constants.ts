@@ -1,11 +1,11 @@
 // @ts-ignore
 import reactlogo from "../assets/images/react-logo.png";
 
-const BASE_API_URL = "https://militext-backend.onrender.com/api/v1";
-const BASE_SOCKET_URL = "https://militext-backend.onrender.com";
+// const BASE_API_URL = "https://militext-backend.onrender.com/api/v1";
+// const BASE_SOCKET_URL = "https://militext-backend.onrender.com";
 
-// const BASE_API_URL = "https://666c09c681cb.ngrok-free.app/api/v1";
-// const BASE_SOCKET_URL = "https://666c09c681cb.ngrok-free.app";
+const BASE_API_URL = "https://1ebae69a2213.ngrok-free.app/api/v1";
+const BASE_SOCKET_URL = "https://1ebae69a2213.ngrok-free.app";
 
 // const BASE_API_URL = "http://localhost:8000/api/v1";
 // const BASE_SOCKET_URL = "http://localhost:8000";

@@ -65,7 +65,9 @@ const Header: React.FC<HeaderProps> = ({
                             onPress={handleBack}
                         />
                     )}
-                    <View>
+                    <View
+                        className={`w-12 h-12 rounded-full items-center justify-center border-2 overflow-hidden`}
+                    >
                         {imageUri ? (
                             <Image
                                 source={{

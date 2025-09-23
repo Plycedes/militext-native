@@ -44,7 +44,20 @@ class UserAPI {
     };
 
     static updateUserPfp = (data: any) => {
-        return apiClient.post("/users/update-avatar", data);
+        const formData = new FormData();
+
+        formData.append("avatar", {
+            uri: data.avatar.uri,
+            name: data.avatar.fileName,
+            type: data.avatar.mimeType,
+        } as any);
+
+        console.log("Formdata", formData);
+        return apiClient.post("/users/update-avatar", formData, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
     };
 
     static updateUser = (data: any) => {

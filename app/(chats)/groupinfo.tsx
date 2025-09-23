@@ -154,7 +154,19 @@ const GroupChatInfo = () => {
         return (
             <View className="flex-row justify-between items-center py-3 border-b border-cyan-400/20">
                 <View className="flex-row items-center">
-                    <Text className="text-white text-lg font-semibold">{item.username}</Text>
+                    <View className="w-12 h-12 rounded-full items-center justify-center border-2 border-cyan-400/20 overflow-hidden">
+                        {item.avatar ? (
+                            <Image
+                                source={{
+                                    uri: item.avatar,
+                                }}
+                                className="w-12 h-12"
+                            />
+                        ) : (
+                            <Ionicons name="person-outline" size={24} color="#00f6ff" />
+                        )}
+                    </View>
+                    <Text className="ml-2 text-white text-lg font-semibold">{item.username}</Text>
                     {isItemAdmin && (
                         <View
                             className={`flex items-center justify-center h-6 px-2 ml-2 rounded-full ${
@@ -256,7 +268,7 @@ const GroupChatInfo = () => {
                                     className="w-36 h-36 rounded-full border-4 border-cyan-400/60"
                                 />
                             ) : (
-                                <Ionicons name="people-circle-outline" size={120} color="#22d3ee" />
+                                <Ionicons name="people-outline" size={120} color="#22d3ee" />
                             )}
 
                             {/* Scanning Effect */}
