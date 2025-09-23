@@ -1,10 +1,16 @@
 import { UserInterface } from "./misc";
 
+export interface Attachment {
+    url: string;
+    publicId: string;
+}
+
 export interface Message {
     _id: string;
     sender: UserInterface;
     content: string;
     chat: string;
+    attachments: Attachment[];
     createdAt: string;
     updatedAt: string;
 }

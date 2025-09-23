@@ -1,3 +1,4 @@
+import * as ImagePicker from "expo-image-picker";
 import { apiClient } from "./apiClient";
 
 class AuthAPI {
@@ -72,6 +73,31 @@ class MessageAPI {
 
     static deleteMessage = (chatId: string, messageId: string) => {
         return apiClient.delete(`/messages/${chatId}/${messageId}`);
+    };
+
+    static uploadAttachments = (images: ImagePicker.ImagePickerAsset[]) => {
+        console.log("Images", images);
+        const formData = new FormData();
+
+        images.forEach((image, index) => {
+            if (!image.uri) return;
+
+            // Extract file extension
+            const uriParts = image.uri.split(".");
+            const fileType = uriParts[uriParts.length - 1];
+
+            formData.append("attachments", {
+                uri: image.uri,
+                name: `attachment_${index}.${fileType}`,
+                type: `image/${fileType}`,
+            } as any);
+        });
+
+        return apiClient.post("/messages/message/attachments/upload", formData, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
     };
 }
 

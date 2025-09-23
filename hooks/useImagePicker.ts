@@ -9,9 +9,9 @@ export const useImagePicker = () => {
             try {
                 const result = await ImagePicker.launchImageLibraryAsync({
                     mediaTypes: ["images"],
-                    aspect: [4, 3], // default aspect ratio
+                    aspect: [4, 3],
                     quality: 1,
-                    ...options, // allow overrides
+                    ...options,
                 });
 
                 if (!result.canceled) {
@@ -26,5 +26,30 @@ export const useImagePicker = () => {
         []
     );
 
-    return { pickImage };
+    const pickMultipleImages = useCallback(
+        async (
+            options: Partial<ImagePicker.ImagePickerOptions> = {}
+        ): Promise<ImagePicker.ImagePickerAsset[] | null> => {
+            try {
+                const result = await ImagePicker.launchImageLibraryAsync({
+                    mediaTypes: ["images"],
+                    allowsMultipleSelection: true,
+                    aspect: [4, 3],
+                    quality: 1,
+                    ...options,
+                });
+
+                if (!result.canceled) {
+                    return result.assets;
+                }
+                return null;
+            } catch (err) {
+                console.log("Image picker error:", err);
+                return null;
+            }
+        },
+        []
+    );
+
+    return { pickImage, pickMultipleImages };
 };

@@ -2,17 +2,20 @@ import { Header } from "@/components";
 import { useAuth } from "@/context/AuthContext";
 import { useSocket } from "@/context/SocketContext";
 import useAxios from "@/hooks/useAxios";
+import { useImagePicker } from "@/hooks/useImagePicker";
 import { DropdownOption } from "@/types/misc";
 import { Message, MessagesResponse } from "@/types/responseTypes";
 import { MessageAPI } from "@/utils/apiMethods";
 import { ChatEventEnum } from "@/utils/constants";
 import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
 import { RelativePathString, router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
     Alert,
     FlatList,
+    Image,
     Keyboard,
     KeyboardAvoidingView,
     Platform,
@@ -33,15 +36,17 @@ const ChatPage: React.FC = () => {
     }>();
     const { user } = useAuth();
     const { socket } = useSocket();
+    const { pickMultipleImages } = useImagePicker();
     const { data } = useAxios<MessagesResponse>(MessageAPI.getChatMessages, chatId);
 
     const [input, setInput] = useState<string>("");
     const [messages, setMessages] = useState<Message[]>([]);
     const [isTyping, setIsTyping] = useState(false);
     const [typingUser, setTypingUser] = useState<string | null>(null);
-    const [initialLoad, setInitialLoad] = useState(true);
+    const [initialLoad, setInitialLoad] = useState<boolean>(true);
     const [keyboardHeight, setKeyboardHeight] = useState(0);
-    const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+    const [isKeyboardVisible, setIsKeyboardVisible] = useState<boolean>(false);
+    const [images, setImages] = useState<ImagePicker.ImagePickerAsset[]>([]);
 
     const [hasMore, setHasMore] = useState(true);
 
@@ -190,12 +195,19 @@ const ChatPage: React.FC = () => {
         }, 50);
     };
 
-    const onAttach = (): void => {
-        Alert.alert("Attachments", "Select source", [
-            { text: "Camera", onPress: () => {} },
-            { text: "Library", onPress: () => {} },
-            { text: "Cancel", style: "cancel" },
-        ]);
+    const onAttach = async () => {
+        // Alert.alert("Attachments", "Select source", [
+        //     { text: "Camera", onPress: () => {} },
+        //     { text: "Library", onPress: () => {} },
+        //     { text: "Cancel", style: "cancel" },
+        // ]);
+
+        const picks = await pickMultipleImages();
+        if (picks) {
+            setImages(picks);
+            const response = await MessageAPI.uploadAttachments(picks);
+            console.log(response.data.data);
+        }
     };
 
     const onNewMessage = (message: Message) => {
@@ -251,6 +263,9 @@ const ChatPage: React.FC = () => {
         const showUnreadDivider = false;
         const isMe = item.sender._id === user?._id;
 
+        const attachments = item.attachments || [];
+        const hasAttachments = attachments.length > 0;
+
         return (
             <View className="px-4">
                 {showUnreadDivider && (
@@ -271,10 +286,37 @@ const ChatPage: React.FC = () => {
                                   : "border border-cyan-400/30 shadow-cyan-400/20 shadow-md bg-cyan-400/10"
                         }`}
                     >
-                        <Text className="text-white">{item.content}</Text>
+                        {/* Text message */}
+                        {item.content ? <Text className="text-white">{item.content}</Text> : null}
+
+                        {/* First image preview */}
+                        {hasAttachments && (
+                            <View className="mt-2 relative">
+                                <Image
+                                    source={{ uri: attachments[0].url }}
+                                    className="w-48 h-48 rounded-lg"
+                                    resizeMode="cover"
+                                />
+                                {attachments.length > 1 && (
+                                    <View className="absolute bottom-2 right-2 bg-black/60 px-2 py-1 rounded-full">
+                                        <Text className="text-white text-xs font-semibold">
+                                            +{attachments.length - 1}
+                                        </Text>
+                                    </View>
+                                )}
+                            </View>
+                        )}
+
+                        {/* Timestamp */}
                         <View className={`mt-1 ${isMe ? "items-end" : "items-start"}`}>
                             <Text
-                                className={`${isMe ? "text-slate-300/70" : false ? "text-yellow-300/80" : "text-cyan-300/80"} text-xs`}
+                                className={`${
+                                    isMe
+                                        ? "text-slate-300/70"
+                                        : false
+                                          ? "text-yellow-300/80"
+                                          : "text-cyan-300/80"
+                                } text-xs`}
                             >
                                 {new Date(item.updatedAt).toLocaleString()}
                             </Text>
