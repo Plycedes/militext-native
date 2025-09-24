@@ -12,7 +12,7 @@ SplashScreen.preventAutoHideAsync();
 
 const customToastConfig: ToastConfig = {
     success: ({ text1, text2 }: ToastConfigParams<any>) => (
-        <View className="flex-row bg-gray-600 p-3 rounded-full max-w-[80%] justify-center items-center">
+        <View className="flex-row bg-gray-600 p-3 rounded-full z-[9999] max-w-[80%] justify-center items-center">
             <View>
                 <Text className="text-white font-semibold">{text1}</Text>
                 {text2 ? <Text className="text-gray-300">{text2}</Text> : null}
@@ -59,4 +59,3 @@ export default function RootLayout() {
         </>
     );
 }
-

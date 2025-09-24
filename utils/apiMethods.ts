@@ -135,11 +135,11 @@ class GroupChatAPI {
     };
 
     static promotToAdmin = (chatId: string, userId: string) => {
-        return apiClient.post("/chats/group/promote", { chatId, userId });
+        return apiClient.post("/chats/promote", { chatId, userId });
     };
 
     static demoteFromAdmin = (chatId: string, userId: string) => {
-        return apiClient.post("/chats/group/demote", { chatId, userId });
+        return apiClient.post("/chats/demote", { chatId, userId });
     };
 
     static updateGroupName = (chatId: string, name: string) => {

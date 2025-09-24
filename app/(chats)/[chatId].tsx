@@ -1,4 +1,4 @@
-import { Header, Loader } from "@/components";
+import { Header, ImageViewer, Loader } from "@/components";
 import { useAuth } from "@/context/AuthContext";
 import { useSocket } from "@/context/SocketContext";
 import useAxios from "@/hooks/useAxios";
@@ -48,6 +48,9 @@ const ChatPage: React.FC = () => {
     const [isKeyboardVisible, setIsKeyboardVisible] = useState<boolean>(false);
     const [images, setImages] = useState<ImagePicker.ImagePickerAsset[]>([]);
 
+    const [openImageViewer, setOpenImageViewer] = useState<boolean>(false);
+    const [attachments, setAttachments] = useState<Attachment[]>([]);
+
     const [loading, setLoading] = useState<boolean>(false);
 
     const [hasMore, setHasMore] = useState(true);
@@ -55,6 +58,7 @@ const ChatPage: React.FC = () => {
     const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const flatListRef = useRef<FlatList<Message>>(null);
+    const isEnabled = input.trim() !== "" || images.length > 0;
 
     const menuOptions: DropdownOption[] = useMemo(
         () => [
@@ -188,7 +192,8 @@ const ChatPage: React.FC = () => {
 
     const onSend = async () => {
         const content: string = input.trim();
-        if (!content || !socket) return;
+        console.log("here");
+        if (!socket) return;
 
         let attachments: Attachment[] = [];
 
@@ -202,6 +207,7 @@ const ChatPage: React.FC = () => {
                 console.log(error.response.data.message);
             } finally {
                 setLoading(false);
+                setImages([]);
             }
         }
 
@@ -275,6 +281,13 @@ const ChatPage: React.FC = () => {
         }
     };
 
+    const handleImageTap = (message: Message) => {
+        if (message.attachments.length > 0) {
+            setAttachments(message.attachments);
+            setOpenImageViewer(true);
+        }
+    };
+
     const renderMessage = ({ item, index }: { item: Message; index: number }) => {
         const showUnreadDivider = false;
         const isMe = item.sender._id === user?._id;
@@ -293,7 +306,7 @@ const ChatPage: React.FC = () => {
                 )}
 
                 <View className={`flex-row mb-2 ${isMe ? "justify-end" : "justify-start"}`}>
-                    <View
+                    <TouchableOpacity
                         className={`max-w-[80%] rounded-2xl px-4 py-3 ${
                             isMe
                                 ? "border border-slate-400/30 shadow-slate-400/20 shadow-md bg-slate-400/10"
@@ -301,6 +314,7 @@ const ChatPage: React.FC = () => {
                                   ? "border border-yellow-400/40 shadow-yellow-400/20 shadow-md bg-yellow-400/10"
                                   : "border border-cyan-400/30 shadow-cyan-400/20 shadow-md bg-cyan-400/10"
                         }`}
+                        onPress={() => handleImageTap(item)}
                     >
                         {/* First image preview */}
                         {hasAttachments && (
@@ -338,7 +352,7 @@ const ChatPage: React.FC = () => {
                                 {new Date(item.updatedAt).toLocaleString()}
                             </Text>
                         </View>
-                    </View>
+                    </TouchableOpacity>
                 </View>
             </View>
         );
@@ -420,52 +434,69 @@ const ChatPage: React.FC = () => {
 
                     {/* Input Dock */}
                     <View className="px-4 pb-4">
-                        <View className="bg-white/10 backdrop-blur-md border border-cyan-400/30 rounded-2xl px-3 py-2">
-                            <View className="flex-row items-end">
-                                {/* Attach */}
-                                <TouchableOpacity
-                                    onPress={onAttach}
-                                    className="w-10 h-10 rounded-xl items-center justify-center bg-white/5 border border-cyan-400/20 mr-2"
-                                    activeOpacity={0.85}
-                                >
-                                    <Ionicons name="attach-outline" size={20} color="#00d4ff" />
-                                </TouchableOpacity>
-
-                                {/* Input */}
-                                <View className="flex-1">
-                                    <TextInput
-                                        className="text-white text-base px-3 py-2"
-                                        placeholder="Transmit message…"
-                                        placeholderTextColor="#7dd3fc99"
-                                        value={input}
-                                        onChangeText={handleTyping}
-                                        onFocus={handleTextInputFocus}
-                                        multiline
-                                        maxLength={4000}
-                                    />
+                        <View className="bg-white/10 rounded-2xl">
+                            {images.length > 0 && (
+                                <View className="flex-row px-4 py-2 justify-between">
+                                    <Text className="text-cyan-400">Attachments selected</Text>
+                                    <TouchableOpacity onPress={() => setImages([])}>
+                                        <Ionicons name="close-sharp" size={16} color="#00d4ff" />
+                                    </TouchableOpacity>
                                 </View>
+                            )}
 
-                                {/* Send */}
-                                <TouchableOpacity
-                                    onPress={onSend}
-                                    disabled={!input.trim()}
-                                    className={`w-10 h-10 rounded-xl items-center justify-center ml-2 border ${
-                                        input.trim()
-                                            ? "bg-white/10 border-cyan-400/40"
-                                            : "bg-white/5 border-cyan-400/10"
-                                    }`}
-                                    activeOpacity={0.85}
-                                >
-                                    <Ionicons
-                                        name="send"
-                                        size={18}
-                                        color={input.trim() ? "#00f6ff" : "#6b7280"}
-                                    />
-                                </TouchableOpacity>
+                            <View className="bg-white/10 backdrop-blur-md border border-cyan-400/30 rounded-2xl px-3 py-2">
+                                <View className="flex-row items-end">
+                                    {/* Attach */}
+                                    <TouchableOpacity
+                                        onPress={onAttach}
+                                        className="w-10 h-10 rounded-xl items-center justify-center bg-white/5 border border-cyan-400/20 mr-2"
+                                        activeOpacity={0.85}
+                                    >
+                                        <Ionicons name="attach-outline" size={20} color="#00d4ff" />
+                                    </TouchableOpacity>
+
+                                    {/* Input */}
+                                    <View className="flex-1">
+                                        <TextInput
+                                            className="text-white text-base px-3 py-2"
+                                            placeholder="Transmit message…"
+                                            placeholderTextColor="#7dd3fc99"
+                                            value={input}
+                                            onChangeText={handleTyping}
+                                            onFocus={handleTextInputFocus}
+                                            multiline
+                                            maxLength={4000}
+                                        />
+                                    </View>
+
+                                    {/* Send */}
+
+                                    <TouchableOpacity
+                                        onPress={onSend}
+                                        disabled={!isEnabled}
+                                        className={`w-10 h-10 rounded-xl items-center justify-center ml-2 border ${
+                                            isEnabled
+                                                ? "bg-white/10 border-cyan-400/40"
+                                                : "bg-white/5 border-cyan-400/10"
+                                        }`}
+                                        activeOpacity={0.85}
+                                    >
+                                        <Ionicons
+                                            name="send"
+                                            size={18}
+                                            color={isEnabled ? "#00f6ff" : "#6b7280"}
+                                        />
+                                    </TouchableOpacity>
+                                </View>
                             </View>
                         </View>
                     </View>
                 </KeyboardAvoidingView>
+                <ImageViewer
+                    visible={openImageViewer}
+                    attachments={attachments}
+                    onClose={() => setOpenImageViewer(false)}
+                />
             </LinearGradient>
         </SafeAreaView>
     );

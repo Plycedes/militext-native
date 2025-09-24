@@ -74,6 +74,7 @@ const GroupChatInfo = () => {
                 type: "success",
                 text1: error.response.data.message,
             });
+            console.log(error.response.data.message);
         } finally {
             setIsLoading(false);
         }

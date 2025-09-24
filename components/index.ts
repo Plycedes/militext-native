@@ -2,6 +2,7 @@ import AddParticipantModal from "./AddParticipantModal";
 import ConfirmDialog from "./DialogBox";
 import GlassButton from "./GlassButton";
 import Header from "./Header";
+import ImageViewer from "./ImageViewer";
 import InputField from "./InputField";
 import Loader from "./Loader";
 import PasswordModal from "./PasswordModal";
@@ -14,6 +15,7 @@ export {
     ConfirmDialog,
     GlassButton,
     Header,
+    ImageViewer,
     InputField,
     Loader,
     PasswordModal,
