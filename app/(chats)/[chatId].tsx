@@ -1,4 +1,4 @@
-import { Header, ImageViewer, Loader } from "@/components";
+import { ConfirmDialog, Header, ImageViewer, Loader } from "@/components";
 import { useAuth } from "@/context/AuthContext";
 import { useSocket } from "@/context/SocketContext";
 import useAxios from "@/hooks/useAxios";
@@ -38,7 +38,7 @@ const ChatPage: React.FC = () => {
     const { user } = useAuth();
     const { socket } = useSocket();
     const { pickMultipleImages } = useImagePicker();
-    const { data } = useAxios<MessagesResponse>(MessageAPI.getChatMessages, chatId);
+    const { data, refetch } = useAxios<MessagesResponse>(MessageAPI.getChatMessages, chatId);
 
     const [input, setInput] = useState<string>("");
     const [isTyping, setIsTyping] = useState(false);
@@ -55,16 +55,19 @@ const ChatPage: React.FC = () => {
     const [attachments, setAttachments] = useState<Attachment[]>([]);
 
     const [loading, setLoading] = useState<boolean>(false);
+    const [loadingMessage, setLoadingMessage] = useState<string>("");
     const [hasMore, setHasMore] = useState(true);
 
     const [selected, setSelected] = useState<string[]>([]);
+
+    const [deleteDialogVisible, setDeleteDialogVisible] = useState<boolean>(false);
 
     const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const flatListRef = useRef<FlatList<Message>>(null);
     const isEnabled = input.trim() !== "" || images.length > 0;
 
-    const menuOptions: DropdownOption[] = useMemo(
+    const defaultMenuOptions: DropdownOption[] = useMemo(
         () => [
             {
                 id: "search",
@@ -99,6 +102,17 @@ const ChatPage: React.FC = () => {
         ],
         [chatId]
     );
+
+    const messageMenuOptions: DropdownOption[] = [
+        {
+            id: "delete",
+            label: "Delete",
+            icon: "trash-bin-outline",
+            action: () => setDeleteDialogVisible(true),
+        },
+    ];
+
+    const [menuOptions, setMenuOptions] = useState<DropdownOption[]>(defaultMenuOptions);
 
     // Keyboard event listeners
     useEffect(() => {
@@ -144,11 +158,13 @@ const ChatPage: React.FC = () => {
         socket.on(ChatEventEnum.NEW_MESSAGE_EVENT, onNewMessage);
         socket.on(ChatEventEnum.TYPING_EVENT, onTyping);
         socket.on(ChatEventEnum.STOP_TYPING_EVENT, onStopTyping);
+        socket.on(ChatEventEnum.MESSAGE_DELETE_EVENT, onMessageDeleted);
 
         return () => {
             socket.off(ChatEventEnum.NEW_MESSAGE_EVENT, onNewMessage);
             socket.off(ChatEventEnum.TYPING_EVENT, onTyping);
             socket.off(ChatEventEnum.STOP_TYPING_EVENT, onStopTyping);
+            socket.off(ChatEventEnum.MESSAGE_DELETE_EVENT, onMessageDeleted);
             socket.emit(ChatEventEnum.LEAVE_CHAT_EVENT, chatId);
         };
     }, [data, chatId, socket]);
@@ -180,6 +196,12 @@ const ChatPage: React.FC = () => {
             }
             return true; // prevent default behavior (going back)
         };
+
+        if (selected.length > 0) {
+            setMenuOptions(messageMenuOptions);
+        } else {
+            setMenuOptions(defaultMenuOptions);
+        }
 
         const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction);
 
@@ -218,6 +240,7 @@ const ChatPage: React.FC = () => {
         if (images.length > 0) {
             try {
                 setLoading(true);
+                setLoadingMessage("Uploading Attachments");
                 const response = await MessageAPI.uploadAttachments(images);
                 attachments = response.data.data;
             } catch (error: any) {
@@ -225,6 +248,7 @@ const ChatPage: React.FC = () => {
                 console.log(error.response.data.message);
             } finally {
                 setLoading(false);
+                setLoadingMessage("");
                 setImages([]);
             }
         }
@@ -299,6 +323,10 @@ const ChatPage: React.FC = () => {
         }
     };
 
+    const onMessageDeleted = async () => {
+        await refetch();
+    };
+
     const handleImageTap = (message: Message) => {
         if (message.attachments.length > 0) {
             setAttachments(message.attachments);
@@ -334,8 +362,22 @@ const ChatPage: React.FC = () => {
                                   ? "border border-yellow-400/40 shadow-yellow-400/20 shadow-md bg-yellow-400/10"
                                   : "border border-cyan-400/30 shadow-cyan-400/20 shadow-md bg-cyan-400/10"
                         }`}
-                        onPress={() => handleImageTap(item)}
-                        onLongPress={() => setSelected((prev) => [...prev, item._id])}
+                        onPress={() => {
+                            if (isMe && selected.length > 0) {
+                                setSelected((prev) =>
+                                    prev.includes(item._id)
+                                        ? prev.filter((id) => id !== item._id)
+                                        : [...prev, item._id]
+                                );
+                            } else {
+                                handleImageTap(item);
+                            }
+                        }}
+                        onLongPress={() => {
+                            if (isMe) {
+                                setSelected((prev) => [...prev, item._id]);
+                            }
+                        }}
                     >
                         {/* First image preview */}
                         {hasAttachments && (
@@ -413,10 +455,31 @@ const ChatPage: React.FC = () => {
         }
     };
 
+    const deleteMessages = async () => {
+        try {
+            setLoadingMessage("Deleting messages");
+            setLoading(true);
+            await MessageAPI.deleteMessages(chatId, selected);
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setLoading(false);
+            setLoadingMessage("");
+            setDeleteDialogVisible(false);
+        }
+    };
+
     return (
         <SafeAreaView className="flex-1 bg-black">
             <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
-            <Loader message="Uploading images" visible={loading} />
+            <Loader message={loadingMessage} visible={loading} />
+            <ConfirmDialog
+                visible={deleteDialogVisible}
+                onConfirm={deleteMessages}
+                onCancel={() => setDeleteDialogVisible(false)}
+                title="Are you sure?"
+                message="Delete the selected messages permanently"
+            />
             <LinearGradient
                 colors={["#0a0a0a", "#1a0a2e", "#16213e", "#0f3460"]}
                 className="flex-1"

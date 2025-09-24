@@ -71,8 +71,8 @@ class MessageAPI {
         return apiClient.get(`/messages/${chatId}?before=${before}&limit=${limit}`);
     };
 
-    static deleteMessage = (chatId: string, messageId: string) => {
-        return apiClient.delete(`/messages/${chatId}/${messageId}`);
+    static deleteMessages = (chatId: string, messageIds: string[]) => {
+        return apiClient.post(`/messages/delete/${chatId}/`, { messageIds });
     };
 
     static uploadAttachments = (images: ImagePicker.ImagePickerAsset[]) => {

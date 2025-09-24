@@ -1,5 +1,5 @@
 import { LinearGradient } from "expo-linear-gradient";
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { ActivityIndicator, Animated, Modal, Text, TouchableOpacity, View } from "react-native";
 
 type ConfirmDialogProps = {
@@ -19,10 +19,10 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     onCancel,
     loading,
 }) => {
-    const scale = React.useRef(new Animated.Value(0.8)).current;
-    const opacity = React.useRef(new Animated.Value(0)).current;
+    const scale = useRef(new Animated.Value(0.8)).current;
+    const opacity = useRef(new Animated.Value(0)).current;
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (visible) {
             Animated.parallel([
                 Animated.spring(scale, { toValue: 1, useNativeDriver: true }),
