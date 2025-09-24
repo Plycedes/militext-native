@@ -14,6 +14,7 @@ import { RelativePathString, router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
     Alert,
+    BackHandler,
     FlatList,
     Image,
     Keyboard,
@@ -40,20 +41,23 @@ const ChatPage: React.FC = () => {
     const { data } = useAxios<MessagesResponse>(MessageAPI.getChatMessages, chatId);
 
     const [input, setInput] = useState<string>("");
-    const [messages, setMessages] = useState<Message[]>([]);
     const [isTyping, setIsTyping] = useState(false);
     const [typingUser, setTypingUser] = useState<string | null>(null);
+
+    const [messages, setMessages] = useState<Message[]>([]);
+
     const [initialLoad, setInitialLoad] = useState<boolean>(true);
     const [keyboardHeight, setKeyboardHeight] = useState(0);
     const [isKeyboardVisible, setIsKeyboardVisible] = useState<boolean>(false);
-    const [images, setImages] = useState<ImagePicker.ImagePickerAsset[]>([]);
 
+    const [images, setImages] = useState<ImagePicker.ImagePickerAsset[]>([]);
     const [openImageViewer, setOpenImageViewer] = useState<boolean>(false);
     const [attachments, setAttachments] = useState<Attachment[]>([]);
 
     const [loading, setLoading] = useState<boolean>(false);
-
     const [hasMore, setHasMore] = useState(true);
+
+    const [selected, setSelected] = useState<string[]>([]);
 
     const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -129,7 +133,6 @@ const ChatPage: React.FC = () => {
 
     useEffect(() => {
         if (data) {
-            console.log(data);
             setMessages(data.messages);
             // Scroll to bottom after messages load
             setTimeout(() => {
@@ -167,6 +170,21 @@ const ChatPage: React.FC = () => {
             }, 150);
         }
     }, [messages, initialLoad]);
+
+    useEffect(() => {
+        const backAction = () => {
+            if (selected.length > 0) {
+                setSelected([]);
+            } else {
+                router.back();
+            }
+            return true; // prevent default behavior (going back)
+        };
+
+        const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction);
+
+        return () => backHandler.remove(); // cleanup on unmount
+    }, [selected]);
 
     const handleTyping = (text: string) => {
         setInput(text);
@@ -305,7 +323,9 @@ const ChatPage: React.FC = () => {
                     </View>
                 )}
 
-                <View className={`flex-row mb-2 ${isMe ? "justify-end" : "justify-start"}`}>
+                <View
+                    className={`flex-row mb-2 ${isMe ? "justify-end" : "justify-start"} ${selected.includes(item._id) ? "bg-cyan-300/20" : ""}`}
+                >
                     <TouchableOpacity
                         className={`max-w-[80%] rounded-2xl px-4 py-3 ${
                             isMe
@@ -315,6 +335,7 @@ const ChatPage: React.FC = () => {
                                   : "border border-cyan-400/30 shadow-cyan-400/20 shadow-md bg-cyan-400/10"
                         }`}
                         onPress={() => handleImageTap(item)}
+                        onLongPress={() => setSelected((prev) => [...prev, item._id])}
                     >
                         {/* First image preview */}
                         {hasAttachments && (

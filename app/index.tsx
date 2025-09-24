@@ -12,6 +12,7 @@ import { RelativePathString, router, useFocusEffect } from "expo-router";
 import React, { JSX, useCallback, useEffect, useRef, useState } from "react";
 import {
     Animated,
+    BackHandler,
     Dimensions,
     Easing,
     FlatList,
@@ -33,6 +34,8 @@ const AllChatsPage: React.FC = () => {
     const [selectedFilter, setSelectedFilter] = useState<"all" | "individual" | "groups">("all");
     const [dialogVisible, setDialogVisible] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
+
+    const [selected, setSelected] = useState<string[]>([]);
 
     const searchOpacity = useRef(new Animated.Value(0)).current;
 
@@ -102,6 +105,21 @@ const AllChatsPage: React.FC = () => {
             socket.off(ChatEventEnum.NEW_MESSAGE_EVENT, onNewMessage);
         };
     }, [data, socket]);
+
+    useEffect(() => {
+        const backAction = () => {
+            if (selected.length > 0) {
+                setSelected([]);
+            } else {
+                BackHandler.exitApp();
+            }
+            return true; // prevent default behavior (going back)
+        };
+
+        const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction);
+
+        return () => backHandler.remove(); // cleanup on unmount
+    }, [selected]);
 
     useFocusEffect(
         useCallback(() => {
@@ -185,7 +203,11 @@ const AllChatsPage: React.FC = () => {
                 : item.participants[0];
 
         return (
-            <TouchableOpacity onPress={() => navigateToChat(item)} className="mx-4 mb-3">
+            <TouchableOpacity
+                onPress={() => navigateToChat(item)}
+                onLongPress={() => setSelected((prev) => [...prev, item._id])}
+                className={`mx-4 mb-3 ${selected.includes(item._id) ? "bg-cyan-300/20" : ""}`}
+            >
                 <View
                     className={`rounded-2xl p-4 backdrop-blur-md ${
                         isUnread
