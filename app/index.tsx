@@ -22,8 +22,10 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
+    Vibration,
     View,
 } from "react-native";
+import Toast from "react-native-toast-message";
 
 const { width } = Dimensions.get("window");
 
@@ -44,7 +46,7 @@ const AllChatsPage: React.FC = () => {
 
     const [chats, setChats] = useState<Chat[]>([]);
 
-    const dropdownOptions: DropdownOption[] = [
+    const defaultMenuOptions: DropdownOption[] = [
         {
             id: "search",
             label: "Neural Search",
@@ -85,6 +87,28 @@ const AllChatsPage: React.FC = () => {
         // },
     ];
 
+    const chatMenuOptions: DropdownOption[] = [
+        {
+            id: "delete",
+            label: "Delete",
+            icon: "trash-bin-outline",
+            action: async () => {
+                try {
+                    await CommonChatAPI.deleteChat(selected);
+                    await refetch();
+                    setSelected([]);
+                } catch (error: any) {
+                    Toast.show({
+                        type: "success",
+                        text1: error.response.data.message ?? "Something went wrong",
+                    });
+                }
+            },
+        },
+    ];
+
+    const [dropdownOptions, setDropdownOptions] = useState<DropdownOption[]>(defaultMenuOptions);
+
     useEffect(() => {
         if (data) {
             setChats(data);
@@ -110,11 +134,18 @@ const AllChatsPage: React.FC = () => {
         const backAction = () => {
             if (selected.length > 0) {
                 setSelected([]);
+                Vibration.vibrate(100);
             } else {
                 BackHandler.exitApp();
             }
             return true; // prevent default behavior (going back)
         };
+
+        if (selected.length > 0) {
+            setDropdownOptions(chatMenuOptions);
+        } else {
+            setDropdownOptions(defaultMenuOptions);
+        }
 
         const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction);
 
@@ -160,6 +191,13 @@ const AllChatsPage: React.FC = () => {
         }
     };
 
+    const selectChat = async (chatId: string) => {
+        setSelected((prev) =>
+            prev.includes(chatId) ? prev.filter((id) => id !== chatId) : [...prev, chatId]
+        );
+        Vibration.vibrate(100);
+    };
+
     const filteredChats = chats.filter((chat) => {
         const sender = !chat.isGroupChat
             ? chat.participants[0].username === user?.username
@@ -180,19 +218,25 @@ const AllChatsPage: React.FC = () => {
     };
 
     const navigateToChat = (chat: Chat): void => {
-        const chatId = chat._id;
-        const sender =
-            chat.participants[0]._id === user?._id ? chat.participants[1] : chat.participants[0];
+        if (selected.length > 0) {
+            selectChat(chat._id);
+        } else {
+            const chatId = chat._id;
+            const sender =
+                chat.participants[0]._id === user?._id
+                    ? chat.participants[1]
+                    : chat.participants[0];
 
-        console.log(`Navigate to chat: ${chatId}`);
-        router.push({
-            pathname: `/${chatId}` as RelativePathString,
-            params: {
-                chatName: chat.isGroupChat ? chat.name : sender.username,
-                senderImg: chat.isGroupChat ? chat.avatar : sender.avatar,
-                isGroupChat: chat.isGroupChat ? "true" : "false",
-            },
-        });
+            console.log(`Navigate to chat: ${chatId}`);
+            router.push({
+                pathname: `/${chatId}` as RelativePathString,
+                params: {
+                    chatName: chat.isGroupChat ? chat.name : sender.username,
+                    senderImg: chat.isGroupChat ? chat.avatar : sender.avatar,
+                    isGroupChat: chat.isGroupChat ? "true" : "false",
+                },
+            });
+        }
     };
 
     const renderChatItem = ({ item }: { item: Chat }): JSX.Element => {
@@ -205,7 +249,7 @@ const AllChatsPage: React.FC = () => {
         return (
             <TouchableOpacity
                 onPress={() => navigateToChat(item)}
-                onLongPress={() => setSelected((prev) => [...prev, item._id])}
+                onLongPress={() => selectChat(item._id)}
                 className={`mx-4 mb-3 ${selected.includes(item._id) ? "bg-cyan-300/20" : ""}`}
             >
                 <View

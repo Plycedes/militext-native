@@ -105,6 +105,10 @@ class CommonChatAPI {
     static getUserChats = () => {
         return apiClient.get(`/chats`);
     };
+
+    static deleteChat = (chatIds: string[]) => {
+        return apiClient.patch(`/chats/remove`, { chatIds });
+    };
 }
 
 class SingleChatAPI {
@@ -114,10 +118,6 @@ class SingleChatAPI {
 
     static getSingleInfo = (id?: string) => {
         return apiClient.get(`chats/c/${id}`);
-    };
-
-    static deleteOneOnOneChat = (chatId: string) => {
-        return apiClient.delete(`/chats/remove/${chatId}`);
     };
 }
 
@@ -161,10 +161,6 @@ class GroupChatAPI {
                 "Content-Type": "multipart/form-data",
             },
         });
-    };
-
-    static deleteGroup = (chatId: string) => {
-        return apiClient.delete(`/chats/group/${chatId}`);
     };
 
     static leaveGroup = (chatId: string) => {

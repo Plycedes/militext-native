@@ -4,12 +4,7 @@ import { KeyboardTypeOptions, Text, TextInput, TouchableOpacity, View } from "re
 
 interface InputFieldTypes {
     title: string;
-    icon:
-        | "lock-closed-outline"
-        | "person-outline"
-        | "mail-outline"
-        | "phone-portrait-outline"
-        | "key-outline";
+    icon: keyof typeof Ionicons.glyphMap;
     keyId: string;
     value: string;
     placeholder: string;
