@@ -99,6 +99,10 @@ class MessageAPI {
             },
         });
     };
+
+    static editMessage = (messageId: string, content: string) => {
+        return apiClient.patch(`/messages/edit/${messageId}`, { content });
+    };
 }
 
 class CommonChatAPI {

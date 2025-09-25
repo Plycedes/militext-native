@@ -136,7 +136,11 @@ const AllChatsPage: React.FC = () => {
                 setSelected([]);
                 Vibration.vibrate(100);
             } else {
-                BackHandler.exitApp();
+                if (router.canGoBack()) {
+                    router.back();
+                } else {
+                    return false;
+                }
             }
             return true; // prevent default behavior (going back)
         };
@@ -363,6 +367,7 @@ const AllChatsPage: React.FC = () => {
                                 className="flex-1 ml-3 text-white text-base"
                                 placeholder="Search neural network..."
                                 placeholderTextColor="#64748b"
+                                keyboardType="web-search"
                                 value={searchQuery}
                                 onChangeText={setSearchQuery}
                             />

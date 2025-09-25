@@ -1,7 +1,7 @@
 import AddParticipantModal from "./AddParticipantModal";
 import ConfirmDialog from "./DialogBox";
 import GlassButton from "./GlassButton";
-import Header from "./Header";
+import Header, { DropdownOption } from "./Header";
 import ImageViewer from "./ImageViewer";
 import InputField from "./InputField";
 import Loader from "./Loader";
@@ -13,6 +13,7 @@ import UnderlinedInput from "./UnderlinedInput";
 export {
     AddParticipantModal,
     ConfirmDialog,
+    DropdownOption,
     GlassButton,
     Header,
     ImageViewer,

@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Animated, Easing, Image, Text, TouchableOpacity, View } from "react-native";
 
 export type DropdownOption = {
@@ -7,6 +7,7 @@ export type DropdownOption = {
     label: string;
     icon: keyof typeof Ionicons.glyphMap;
     action: () => void;
+    visible: boolean;
 };
 
 interface HeaderProps {
@@ -32,7 +33,8 @@ const Header: React.FC<HeaderProps> = ({
     const dropdownHeight = useRef(new Animated.Value(0)).current;
 
     const toggleDropdown = () => {
-        const toValue = isDropdownOpen ? 0 : dropdownOptions.length * 50;
+        const filtered = dropdownOptions.filter((option) => option.visible);
+        const toValue = isDropdownOpen ? 0 : filtered.length * 50;
         setIsDropdownOpen(!isDropdownOpen);
 
         if (toValue === 0) {
@@ -51,6 +53,12 @@ const Header: React.FC<HeaderProps> = ({
             }).start();
         }
     };
+
+    useEffect(() => {
+        if (isDropdownOpen) {
+            toggleDropdown();
+        }
+    }, [dropdownOptions]);
 
     return (
         <View className="">
@@ -106,19 +114,27 @@ const Header: React.FC<HeaderProps> = ({
                 style={{ height: dropdownHeight, overflow: "hidden" }}
                 className="bg-gray-900/60 rounded-xl border border-cyan-500/20 backdrop-blur-sm"
             >
-                {dropdownOptions.map((option) => (
-                    <TouchableOpacity
-                        key={option.id}
-                        onPress={() => {
-                            option.action();
-                            toggleDropdown();
-                        }}
-                        className="flex-row items-center px-4 py-3 border-b border-gray-700/30 last:border-b-0"
-                    >
-                        <Ionicons name={option.icon} size={20} color="#00d4ff" className="pb-1" />
-                        <Text className="ml-3 text-white font-pmedium">{option.label}</Text>
-                    </TouchableOpacity>
-                ))}
+                {dropdownOptions.map(
+                    (option) =>
+                        option.visible && (
+                            <TouchableOpacity
+                                key={option.id}
+                                onPress={() => {
+                                    option.action();
+                                    toggleDropdown();
+                                }}
+                                className="flex-row items-center px-4 py-3 border-b border-gray-700/30 last:border-b-0"
+                            >
+                                <Ionicons
+                                    name={option.icon}
+                                    size={20}
+                                    color="#00d4ff"
+                                    className="pb-1"
+                                />
+                                <Text className="ml-3 text-white font-pmedium">{option.label}</Text>
+                            </TouchableOpacity>
+                        )
+                )}
             </Animated.View>
         </View>
     );

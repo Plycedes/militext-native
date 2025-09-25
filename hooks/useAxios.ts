@@ -24,6 +24,7 @@ function useAxios<T>(fn: AsyncFn<T>, id?: string, page = 1, limit = 5) {
             if (error?.response?.status === 401 || error?.response?.status === 403) {
                 router.replace("/sign-in");
             }
+            console.log(error.response ?? error);
         } finally {
             setIsLoading(false);
         }

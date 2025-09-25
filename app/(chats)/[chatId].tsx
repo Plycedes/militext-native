@@ -1,9 +1,8 @@
-import { ConfirmDialog, Header, ImageViewer, Loader } from "@/components";
+import { ConfirmDialog, DropdownOption, Header, ImageViewer, Loader } from "@/components";
 import { useAuth } from "@/context/AuthContext";
 import { useSocket } from "@/context/SocketContext";
 import useAxios from "@/hooks/useAxios";
 import { useImagePicker } from "@/hooks/useImagePicker";
-import { DropdownOption } from "@/types/misc";
 import { Attachment, Message, MessagesResponse } from "@/types/responseTypes";
 import { MessageAPI } from "@/utils/apiMethods";
 import { ChatEventEnum } from "@/utils/constants";
@@ -59,6 +58,7 @@ const ChatPage: React.FC = () => {
     const [hasMore, setHasMore] = useState(true);
 
     const [selected, setSelected] = useState<string[]>([]);
+    const [editing, setEditing] = useState<boolean>(false);
 
     const [deleteDialogVisible, setDeleteDialogVisible] = useState<boolean>(false);
 
@@ -74,6 +74,7 @@ const ChatPage: React.FC = () => {
                 label: "Neural Search",
                 icon: "search-outline",
                 action: () => Alert.alert("Neural Search", "Scanning knowledge lattice…"),
+                visible: true,
             },
             // {
             //     id: "media",
@@ -86,6 +87,7 @@ const ChatPage: React.FC = () => {
                 label: "Silence Node",
                 icon: "volume-mute-outline",
                 action: () => Alert.alert("Silenced", "Notifications muted for this channel."),
+                visible: true,
             },
             // {
             //     id: "secure",
@@ -98,6 +100,7 @@ const ChatPage: React.FC = () => {
                 label: "Channel Details",
                 icon: "information-circle-outline",
                 action: () => handleChatDetails(),
+                visible: true,
             },
         ],
         [chatId]
@@ -105,10 +108,21 @@ const ChatPage: React.FC = () => {
 
     const messageMenuOptions: DropdownOption[] = [
         {
+            id: "Edit",
+            label: "Edit",
+            icon: "pencil-outline",
+            action: () => {
+                setEditing(true);
+                setInput(messages.filter((msg) => msg._id === selected[0])[0].content);
+            },
+            visible: selected.length === 1,
+        },
+        {
             id: "delete",
             label: "Delete",
             icon: "trash-bin-outline",
             action: () => setDeleteDialogVisible(true),
+            visible: true,
         },
     ];
 
@@ -190,6 +204,7 @@ const ChatPage: React.FC = () => {
     useEffect(() => {
         const backAction = () => {
             if (selected.length > 0) {
+                setEditing(false);
                 setSelected([]);
             } else {
                 router.back();
@@ -232,7 +247,16 @@ const ChatPage: React.FC = () => {
 
     const onSend = async () => {
         const content: string = input.trim();
-        console.log("here");
+
+        if (editing) {
+            await MessageAPI.editMessage(selected[0], content);
+            await refetch();
+            setEditing(false);
+            setInput("");
+            setSelected([]);
+            return;
+        }
+
         if (!socket) return;
 
         let attachments: Attachment[] = [];
@@ -415,6 +439,23 @@ const ChatPage: React.FC = () => {
                                 {new Date(item.updatedAt).toLocaleString()}
                             </Text>
                         </View>
+
+                        {/* Edited */}
+                        {item.createdAt !== item.updatedAt && (
+                            <View className={`mt-1 ${isMe ? "items-end" : "items-start"}`}>
+                                <Text
+                                    className={`${
+                                        isMe
+                                            ? "text-slate-300/70"
+                                            : false
+                                              ? "text-yellow-300/80"
+                                              : "text-cyan-300/80"
+                                    } text-xs italic`}
+                                >
+                                    Edited
+                                </Text>
+                            </View>
+                        )}
                     </TouchableOpacity>
                 </View>
             </View>
