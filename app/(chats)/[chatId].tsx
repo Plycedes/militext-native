@@ -6,6 +6,7 @@ import { useImagePicker } from "@/hooks/useImagePicker";
 import { Attachment, Message, MessagesResponse } from "@/types/responseTypes";
 import { MessageAPI } from "@/utils/apiMethods";
 import { ChatEventEnum } from "@/utils/constants";
+import { formatDateLabel, formatTimeOnly } from "@/utils/date-time";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
@@ -128,6 +129,17 @@ const ChatPage: React.FC = () => {
 
     const [menuOptions, setMenuOptions] = useState<DropdownOption[]>(defaultMenuOptions);
 
+    const [floatingDate, setFloatingDate] = useState<string>("");
+
+    const handleViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: any[] }) => {
+        if (viewableItems.length > 0) {
+            const firstVisibleDate = new Date(viewableItems[0].item.createdAt);
+            setFloatingDate(formatDateLabel(firstVisibleDate));
+        }
+    }).current;
+
+    const viewConfigRef = useRef({ viewAreaCoveragePercentThreshold: 50 });
+
     // Keyboard event listeners
     useEffect(() => {
         const keyboardWillShowListener = Keyboard.addListener(
@@ -247,12 +259,12 @@ const ChatPage: React.FC = () => {
 
     const onSend = async () => {
         const content: string = input.trim();
+        setInput("");
 
         if (editing) {
             await MessageAPI.editMessage(selected[0], content);
             await refetch();
             setEditing(false);
-            setInput("");
             setSelected([]);
             return;
         }
@@ -359,104 +371,103 @@ const ChatPage: React.FC = () => {
     };
 
     const renderMessage = ({ item, index }: { item: Message; index: number }) => {
-        const showUnreadDivider = false;
         const isMe = item.sender._id === user?._id;
-
         const attachments = item.attachments || [];
         const hasAttachments = attachments.length > 0;
 
+        // --- Date divider logic ---
+        const currentDate = new Date(item.createdAt);
+        const prevDate = index > 0 ? new Date(messages[index - 1].createdAt) : null;
+        const showDateDivider = !prevDate || currentDate.toDateString() !== prevDate.toDateString();
+
         return (
-            <View className="px-4">
-                {showUnreadDivider && (
-                    <View className="flex-row items-center my-3">
-                        <View className="flex-1 h-[1px] bg-yellow-400/30" />
-                        <Text className="mx-2 text-yellow-300/90 text-xs">Unread</Text>
-                        <View className="flex-1 h-[1px] bg-yellow-400/30" />
+            <View>
+                {/* Inline date divider (scrolls with messages) */}
+                {showDateDivider && (
+                    <View className="items-center my-2">
+                        <View className="bg-slate-700/70 px-3 py-1 rounded-full">
+                            <Text className="text-white text-xs font-semibold">
+                                {formatDateLabel(currentDate)}
+                            </Text>
+                        </View>
                     </View>
                 )}
 
-                <View
-                    className={`flex-row mb-2 ${isMe ? "justify-end" : "justify-start"} ${selected.includes(item._id) ? "bg-cyan-300/20" : ""}`}
-                >
-                    <TouchableOpacity
-                        className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-                            isMe
-                                ? "border border-slate-400/30 shadow-slate-400/20 shadow-md bg-slate-400/10"
-                                : false
-                                  ? "border border-yellow-400/40 shadow-yellow-400/20 shadow-md bg-yellow-400/10"
-                                  : "border border-cyan-400/30 shadow-cyan-400/20 shadow-md bg-cyan-400/10"
-                        }`}
-                        onPress={() => {
-                            if (isMe && selected.length > 0) {
-                                setSelected((prev) =>
-                                    prev.includes(item._id)
-                                        ? prev.filter((id) => id !== item._id)
-                                        : [...prev, item._id]
-                                );
-                            } else {
-                                handleImageTap(item);
-                            }
-                        }}
-                        onLongPress={() => {
-                            if (isMe) {
-                                setSelected((prev) => [...prev, item._id]);
-                            }
-                        }}
+                <View className="px-4 mb-2">
+                    <View
+                        className={`flex-row ${
+                            isMe ? "justify-end" : "justify-start"
+                        } ${selected.includes(item._id) ? "bg-cyan-300/20" : ""}`}
                     >
-                        {/* First image preview */}
-                        {hasAttachments && (
-                            <View className="mt-2 relative">
-                                <Image
-                                    source={{ uri: attachments[0].url }}
-                                    className="w-48 h-48 rounded-lg"
-                                    resizeMode="cover"
-                                />
-                                {attachments.length > 1 && (
-                                    <View className="absolute bottom-2 right-2 bg-black/60 px-2 py-1 rounded-full">
-                                        <Text className="text-white text-xs font-semibold">
-                                            +{attachments.length - 1}
-                                        </Text>
-                                    </View>
-                                )}
-                            </View>
-                        )}
-                        {/* Text message */}
-                        {item.content ? (
-                            <Text className="text-white mt-1">{item.content}</Text>
-                        ) : null}
+                        <TouchableOpacity
+                            className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+                                isMe
+                                    ? "border border-slate-400/30 shadow-slate-400/20 shadow-md bg-slate-400/10"
+                                    : "border border-cyan-400/30 shadow-cyan-400/20 shadow-md bg-cyan-400/10"
+                            }`}
+                            onPress={() => {
+                                if (isMe && selected.length > 0) {
+                                    setSelected((prev) =>
+                                        prev.includes(item._id)
+                                            ? prev.filter((id) => id !== item._id)
+                                            : [...prev, item._id]
+                                    );
+                                } else {
+                                    handleImageTap(item);
+                                }
+                            }}
+                            onLongPress={() => {
+                                if (isMe) {
+                                    setSelected((prev) => [...prev, item._id]);
+                                }
+                            }}
+                        >
+                            {/* Attachments */}
+                            {hasAttachments && (
+                                <View className="mt-2 relative">
+                                    <Image
+                                        source={{ uri: attachments[0].url }}
+                                        className="w-48 h-48 rounded-lg"
+                                        resizeMode="cover"
+                                    />
+                                    {attachments.length > 1 && (
+                                        <View className="absolute bottom-2 right-2 bg-black/60 px-2 py-1 rounded-full">
+                                            <Text className="text-white text-xs font-semibold">
+                                                +{attachments.length - 1}
+                                            </Text>
+                                        </View>
+                                    )}
+                                </View>
+                            )}
 
-                        {/* Timestamp */}
-                        <View className={`mt-1 ${isMe ? "items-end" : "items-start"}`}>
-                            <Text
-                                className={`${
-                                    isMe
-                                        ? "text-slate-300/70"
-                                        : false
-                                          ? "text-yellow-300/80"
-                                          : "text-cyan-300/80"
-                                } text-xs`}
+                            {/* Text message */}
+                            {item.content ? (
+                                <Text className="text-white mt-1">{item.content}</Text>
+                            ) : null}
+
+                            {/* Timestamp (time only) & Edited tag */}
+                            <View
+                                className={`flex-row gap-1 mt-1 ${isMe ? "items-end" : "items-start"}`}
                             >
-                                {new Date(item.updatedAt).toLocaleString()}
-                            </Text>
-                        </View>
-
-                        {/* Edited */}
-                        {item.createdAt !== item.updatedAt && (
-                            <View className={`mt-1 ${isMe ? "items-end" : "items-start"}`}>
                                 <Text
                                     className={`${
-                                        isMe
-                                            ? "text-slate-300/70"
-                                            : false
-                                              ? "text-yellow-300/80"
-                                              : "text-cyan-300/80"
-                                    } text-xs italic`}
+                                        isMe ? "text-slate-300/70" : "text-cyan-300/80"
+                                    } text-xs`}
                                 >
-                                    Edited
+                                    {formatTimeOnly(currentDate)}
                                 </Text>
+                                {item.createdAt !== item.updatedAt && (
+                                    <Text
+                                        className={`${
+                                            isMe ? "text-slate-300/70" : "text-cyan-300/80"
+                                        } text-xs italic`}
+                                    >
+                                        Edited
+                                    </Text>
+                                )}
                             </View>
-                        )}
-                    </TouchableOpacity>
+                        </TouchableOpacity>
+                    </View>
                 </View>
             </View>
         );
@@ -539,12 +550,13 @@ const ChatPage: React.FC = () => {
                             showBack={true}
                             handleBack={() => router.back()}
                             imageUri={senderImg}
-                            isGroupChat={isGroupChat === "true" ? true : false}
+                            isGroupChat={isGroupChat === "true"}
                         />
                     </View>
 
-                    {/* Messages */}
-                    <View style={{ flex: 1 }}>
+                    {/* Messages + Floating Tag */}
+                    <View className="flex-1 relative">
+                        {/* Messages */}
                         <FlatList
                             ref={flatListRef}
                             data={messages}
@@ -554,7 +566,20 @@ const ChatPage: React.FC = () => {
                             contentContainerStyle={getContentContainerPadding()}
                             onScroll={handleTopScroll}
                             scrollEventThrottle={16}
+                            onViewableItemsChanged={handleViewableItemsChanged}
+                            viewabilityConfig={viewConfigRef.current}
                         />
+
+                        {/* Floating date tag (absolute inside list container) */}
+                        {floatingDate ? (
+                            <View className="absolute left-0 right-0 items-center top-0 z-10">
+                                <View className="bg-slate-700/80 px-4 py-1 rounded-full">
+                                    <Text className="text-white font-semibold text-sm">
+                                        {floatingDate}
+                                    </Text>
+                                </View>
+                            </View>
+                        ) : null}
                     </View>
 
                     {/* Input Dock */}

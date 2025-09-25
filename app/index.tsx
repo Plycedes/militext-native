@@ -6,6 +6,7 @@ import { DropdownOption } from "@/types/misc";
 import { Chat } from "@/types/responseTypes";
 import { CommonChatAPI } from "@/utils/apiMethods";
 import { ChatEventEnum } from "@/utils/constants";
+import { formatDateLabel, formatTimeOnly } from "@/utils/date-time";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { RelativePathString, router, useFocusEffect } from "expo-router";
@@ -314,9 +315,11 @@ const AllChatsPage: React.FC = () => {
                                         </View>
                                     )} */}
                                 </View>
-                                <Text className="text-gray-400 font-pregular text-xs">
-                                    {new Date(item.updatedAt).toLocaleString()}
-                                </Text>
+                                {item.lastMessage && (
+                                    <Text className="text-gray-400 font-pregular text-xs">
+                                        {`${formatDateLabel(new Date(item.lastMessage.createdAt))} ${formatTimeOnly(new Date(item.lastMessage.updatedAt))}`}
+                                    </Text>
+                                )}
                             </View>
 
                             <Text className="text-gray-300 font-pregular text-sm" numberOfLines={1}>
