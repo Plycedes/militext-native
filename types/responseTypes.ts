@@ -11,6 +11,7 @@ export interface Message {
     content: string;
     chat: string;
     attachments: Attachment[];
+    replyingTo?: Message;
     createdAt: string;
     updatedAt: string;
 }

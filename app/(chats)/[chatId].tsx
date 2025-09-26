@@ -313,6 +313,7 @@ const ChatPage: React.FC = () => {
     };
 
     const onNewMessage = (message: Message) => {
+        console.log("New message");
         setMessages((prev) => [...prev, message]);
         setTimeout(() => {
             flatListRef.current?.scrollToEnd({ animated: true });
@@ -420,6 +421,18 @@ const ChatPage: React.FC = () => {
                                 }
                             }}
                         >
+                            {/* Reply preview (if replyingTo exists) */}
+                            {item.replyingTo && (
+                                <View className="mb-2 border-l-4 border-cyan-400/60 pl-2">
+                                    <Text className="text-cyan-300 text-xs font-semibold">
+                                        {item.replyingTo.sender?.username || "Unknown"}
+                                    </Text>
+                                    <Text className="text-slate-200 text-sm" numberOfLines={1}>
+                                        {item.replyingTo.content}
+                                    </Text>
+                                </View>
+                            )}
+
                             {/* Attachments */}
                             {hasAttachments && (
                                 <View className="mt-2 relative">
@@ -445,7 +458,9 @@ const ChatPage: React.FC = () => {
 
                             {/* Timestamp (time only) & Edited tag */}
                             <View
-                                className={`flex-row gap-1 mt-1 ${isMe ? "items-end" : "items-start"}`}
+                                className={`flex-row gap-1 mt-1 ${
+                                    isMe ? "items-end" : "items-start"
+                                }`}
                             >
                                 <Text
                                     className={`${
