@@ -1,5 +1,6 @@
 import { Message } from "@/types/responseTypes";
 import { formatTimeOnly } from "@/utils/date-time";
+import { useRef } from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -24,8 +25,10 @@ const MessageBubble = ({
     currentDate: Date;
     handleImageTap: (item: Message) => void;
     handleSwipeToReply: (item: Message) => void;
-    setSelected: React.Dispatch<React.SetStateAction<string[]>>;
+    setSelected: (itemId: string) => void;
 }) => {
+    const touchableRef = useRef(null);
+
     const attachments = item.attachments || [];
     const hasAttachments = attachments.length > 0;
 
@@ -39,7 +42,6 @@ const MessageBubble = ({
     // --- Pan gesture ---
     const panGesture = Gesture.Pan()
         .onUpdate((event) => {
-            console.log("Gesture detected", event.translationX);
             if ((isMe && event.translationX < 0) || (!isMe && event.translationX > 0)) {
                 translateX.value = event.translationX;
             }
@@ -53,12 +55,16 @@ const MessageBubble = ({
         });
 
     return (
-        <View style={{ width: "100%", paddingHorizontal: 16, marginBottom: 8 }}>
+        <View
+            style={{ width: "100%", paddingHorizontal: 16, marginBottom: 8 }}
+            className={`${selected.includes(item._id) ? "bg-cyan-300/20" : ""}`}
+        >
             <GestureDetector gesture={panGesture}>
                 <Animated.View
                     style={[animatedStyle, { alignSelf: isMe ? "flex-end" : "flex-start" }]}
                 >
                     <TouchableOpacity
+                        ref={touchableRef}
                         activeOpacity={0.8}
                         className={`max-w-[80%] rounded-2xl px-4 py-3 ${
                             isMe
@@ -67,17 +73,17 @@ const MessageBubble = ({
                         }`}
                         onPress={() => {
                             if (isMe && selected.length > 0) {
-                                setSelected((prev) =>
-                                    prev.includes(item._id)
-                                        ? prev.filter((id) => id !== item._id)
-                                        : [...prev, item._id]
-                                );
+                                setSelected(item._id);
                             } else {
+                                console.log("Buble");
                                 handleImageTap(item);
                             }
                         }}
                         onLongPress={() => {
-                            if (isMe) setSelected((prev) => [...prev, item._id]);
+                            if (isMe) {
+                                console.log(item._id);
+                                setSelected(item._id);
+                            }
                         }}
                     >
                         {/* Reply preview */}

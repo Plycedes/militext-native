@@ -369,155 +369,19 @@ const ChatPage: React.FC = () => {
     };
 
     const handleImageTap = (message: Message) => {
+        console.log("Tapped");
         if (message.attachments.length > 0) {
             setAttachments(message.attachments);
             setOpenImageViewer(true);
         }
     };
 
-    // const renderMessage = ({ item, index }: { item: Message; index: number }) => {
-    //     const isMe = item.sender._id === user?._id;
-    //     const attachments = item.attachments || [];
-    //     const hasAttachments = attachments.length > 0;
-
-    //     // --- Date divider logic ---
-    //     const currentDate = new Date(item.createdAt);
-    //     const prevDate = index > 0 ? new Date(messages[index - 1].createdAt) : null;
-    //     const showDateDivider = !prevDate || currentDate.toDateString() !== prevDate.toDateString();
-
-    //     // --- Swiping Gesture Handler ---
-    //     const translateX = useSharedValue(0);
-
-    //     const animatedStyle = useAnimatedStyle(() => ({
-    //         transform: [{ translateX: translateX.value }],
-    //     }));
-
-    //     // Configure the pan gesture
-    //     const panGesture = Gesture.Pan()
-    //         .onUpdate((event) => {
-    //             translateX.value = event.translationX;
-    //         })
-    //         .onEnd((event) => {
-    //             const direction = isMe ? 1 : -1; // right for me, left for others
-    //             if (event.translationX * direction > 50) {
-    //                 handleSwipeToReply(item); // call your method
-    //             }
-    //             translateX.value = withSpring(0); // reset animation
-    //         });
-
-    //     return (
-    //         <View>
-    //             {/* Inline date divider (scrolls with messages) */}
-    //             {showDateDivider && (
-    //                 <View className="items-center my-2">
-    //                     <View className="bg-slate-700/70 px-3 py-1 rounded-full">
-    //                         <Text className="text-white text-xs font-semibold">
-    //                             {formatDateLabel(currentDate)}
-    //                         </Text>
-    //                     </View>
-    //                 </View>
-    //             )}
-
-    //             <View className="px-4 mb-2">
-    //                 <View
-    //                     className={`flex-row ${
-    //                         isMe ? "justify-end" : "justify-start"
-    //                     } ${selected.includes(item._id) ? "bg-cyan-300/20" : ""}`}
-    //                 >
-    //                     <GestureDetector gesture={panGesture}>
-    //                         <Animated.View style={animatedStyle}>
-    //                             <TouchableOpacity
-    //                                 className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-    //                                     isMe
-    //                                         ? "border border-slate-400/30 shadow-slate-400/20 shadow-md bg-slate-400/10"
-    //                                         : "border border-cyan-400/30 shadow-cyan-400/20 shadow-md bg-cyan-400/10"
-    //                                 }`}
-    //                                 onPress={() => {
-    //                                     if (isMe && selected.length > 0) {
-    //                                         setSelected((prev) =>
-    //                                             prev.includes(item._id)
-    //                                                 ? prev.filter((id) => id !== item._id)
-    //                                                 : [...prev, item._id]
-    //                                         );
-    //                                     } else {
-    //                                         handleImageTap(item);
-    //                                     }
-    //                                 }}
-    //                                 onLongPress={() => {
-    //                                     if (isMe) {
-    //                                         setSelected((prev) => [...prev, item._id]);
-    //                                     }
-    //                                 }}
-    //                             >
-    //                                 {/* Reply preview (if replyingTo exists) */}
-    //                                 {item.replyingTo && (
-    //                                     <View className="mb-2 border-l-4 border-cyan-400/60 pl-2">
-    //                                         <Text className="text-cyan-300 text-xs font-semibold">
-    //                                             {item.replyingTo.sender?.username || "Unknown"}
-    //                                         </Text>
-    //                                         <Text
-    //                                             className="text-slate-200 text-sm"
-    //                                             numberOfLines={1}
-    //                                         >
-    //                                             {item.replyingTo.content}
-    //                                         </Text>
-    //                                     </View>
-    //                                 )}
-
-    //                                 {/* Attachments */}
-    //                                 {hasAttachments && (
-    //                                     <View className="mt-2 relative">
-    //                                         <Image
-    //                                             source={{ uri: attachments[0].url }}
-    //                                             className="w-48 h-48 rounded-lg"
-    //                                             resizeMode="cover"
-    //                                         />
-    //                                         {attachments.length > 1 && (
-    //                                             <View className="absolute bottom-2 right-2 bg-black/60 px-2 py-1 rounded-full">
-    //                                                 <Text className="text-white text-xs font-semibold">
-    //                                                     +{attachments.length - 1}
-    //                                                 </Text>
-    //                                             </View>
-    //                                         )}
-    //                                     </View>
-    //                                 )}
-
-    //                                 {/* Text message */}
-    //                                 {item.content ? (
-    //                                     <Text className="text-white mt-1">{item.content}</Text>
-    //                                 ) : null}
-
-    //                                 {/* Timestamp (time only) & Edited tag */}
-    //                                 <View
-    //                                     className={`flex-row gap-1 mt-1 ${
-    //                                         isMe ? "items-end" : "items-start"
-    //                                     }`}
-    //                                 >
-    //                                     <Text
-    //                                         className={`${
-    //                                             isMe ? "text-slate-300/70" : "text-cyan-300/80"
-    //                                         } text-xs`}
-    //                                     >
-    //                                         {formatTimeOnly(currentDate)}
-    //                                     </Text>
-    //                                     {item.createdAt !== item.updatedAt && (
-    //                                         <Text
-    //                                             className={`${
-    //                                                 isMe ? "text-slate-300/70" : "text-cyan-300/80"
-    //                                             } text-xs italic`}
-    //                                         >
-    //                                             Edited
-    //                                         </Text>
-    //                                     )}
-    //                                 </View>
-    //                             </TouchableOpacity>
-    //                         </Animated.View>
-    //                     </GestureDetector>
-    //                 </View>
-    //             </View>
-    //         </View>
-    //     );
-    // };
+    const handleSelect = (itemId: string) => {
+        console.log("Here");
+        setSelected((prev) =>
+            prev.includes(itemId) ? prev.filter((id) => id !== itemId) : [...prev, itemId]
+        );
+    };
 
     const renderMessage = ({ item, index }: { item: Message; index: number }) => {
         const isMe = item.sender._id === user?._id;
@@ -538,13 +402,13 @@ const ChatPage: React.FC = () => {
                         </View>
                     </View>
                 )}
-                <View className="px-4 mb-2">
+                <View className="px-4">
                     <MessageBubble
                         item={item}
                         isMe={isMe}
                         selected={selected}
                         currentDate={currentDate}
-                        setSelected={setSelected}
+                        setSelected={handleSelect}
                         handleImageTap={handleImageTap}
                         handleSwipeToReply={handleSwipeToReply}
                     />
