@@ -30,11 +30,12 @@ const GroupChatInfo = () => {
     const [selectedUser, setSelectedUser] = useState<UserInterface | null>(null);
 
     const [isAdmin, setIsAdmin] = useState<boolean>(false);
-    const [editingName, setEditingName] = useState<boolean>(false);
+    const [editingName, setEditingName] = useState<boolean>(false); // for icon control
     const [dropdownVisible, setDropdownVisible] = useState<boolean>(false);
     const [showAllParticipants, setShowAllParticipants] = useState<boolean>(false);
     const [addParticipantVisible, setAddParticipantVisible] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [updatingName, setUpdatingName] = useState<boolean>(false); //  for loader
     const [showImg, setShowImg] = useState<boolean>(false);
 
     useEffect(() => {
@@ -47,8 +48,15 @@ const GroupChatInfo = () => {
     }, [chat]);
 
     const handleUpdateName = async () => {
-        await GroupChatAPI.updateGroupName(chat!._id, groupName);
-        setEditingName(false);
+        try {
+            setUpdatingName(true);
+            await GroupChatAPI.updateGroupName(chat!._id, groupName);
+            setEditingName(false);
+        } catch (error: any) {
+            Toast.show({ type: "success", text1: error.response.data.message ?? "Error occured" });
+        } finally {
+            setUpdatingName(false);
+        }
     };
 
     const handleOptionSelect = async (option: string) => {
@@ -313,14 +321,14 @@ const GroupChatInfo = () => {
 
                         <View className="relative">
                             <Text className="text-cyan-300 text-3xl font-extrabold tracking-wide">
-                                {chat.name}
+                                {groupName}
                             </Text>
                             {/* Glitch Shadow */}
                             <Text
                                 className="absolute top-0 left-0 text-red-400/20 text-3xl font-extrabold tracking-wide"
                                 style={{ transform: [{ translateX: 1 }, { translateY: 1 }] }}
                             >
-                                {chat.name}
+                                {groupName}
                             </Text>
                         </View>
 
@@ -378,17 +386,25 @@ const GroupChatInfo = () => {
                             <Text className="text-white text-2xl font-bold">{groupName}</Text>
                         )}
 
-                        <TouchableOpacity
-                            className="ml-4"
-                            onPress={editingName ? handleUpdateName : () => setEditingName(true)}
-                        >
-                            <Ionicons
-                                name={editingName ? "checkmark" : "pencil"}
-                                size={24}
-                                color="#22d3ee"
-                                className={editingName ? "mt-4" : ""}
-                            />
-                        </TouchableOpacity>
+                        {chat.admin.includes(user!._id) && (
+                            <TouchableOpacity
+                                className="ml-4"
+                                onPress={
+                                    editingName ? handleUpdateName : () => setEditingName(true)
+                                }
+                            >
+                                {updatingName ? (
+                                    <ActivityIndicator size="small" color="#22d3ee" />
+                                ) : (
+                                    <Ionicons
+                                        name={editingName ? "checkmark" : "pencil"}
+                                        size={24}
+                                        color="#22d3ee"
+                                        className={editingName ? "mt-4" : ""}
+                                    />
+                                )}
+                            </TouchableOpacity>
+                        )}
                     </View>
 
                     {/* Participants */}

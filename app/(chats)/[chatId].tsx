@@ -325,10 +325,8 @@ const ChatPage: React.FC = () => {
     const onNewMessage = (message: Message) => {
         setMessages((prev) => [...prev, message]);
         setTimeout(() => {
-            flatListRef.current?.scrollToIndex({
-                index: messages.length - 1,
+            flatListRef.current?.scrollToEnd({
                 animated: true,
-                viewPosition: 0.5,
             });
         }, 50);
     };
