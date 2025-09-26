@@ -184,13 +184,15 @@ const ChatPage: React.FC = () => {
         socket.on(ChatEventEnum.NEW_MESSAGE_EVENT, onNewMessage);
         socket.on(ChatEventEnum.TYPING_EVENT, onTyping);
         socket.on(ChatEventEnum.STOP_TYPING_EVENT, onStopTyping);
-        socket.on(ChatEventEnum.MESSAGE_DELETE_EVENT, onMessageDeleted);
+        socket.on(ChatEventEnum.MESSAGE_DELETE_EVENT, refetch);
+        socket.on(ChatEventEnum.MESSAGE_EDITED_EVENT, refetch);
 
         return () => {
             socket.off(ChatEventEnum.NEW_MESSAGE_EVENT, onNewMessage);
             socket.off(ChatEventEnum.TYPING_EVENT, onTyping);
             socket.off(ChatEventEnum.STOP_TYPING_EVENT, onStopTyping);
-            socket.off(ChatEventEnum.MESSAGE_DELETE_EVENT, onMessageDeleted);
+            socket.off(ChatEventEnum.MESSAGE_DELETE_EVENT, refetch);
+            socket.off(ChatEventEnum.MESSAGE_EDITED_EVENT, refetch);
             socket.emit(ChatEventEnum.LEAVE_CHAT_EVENT, chatId);
         };
     }, [data, chatId, socket]);
@@ -357,10 +359,6 @@ const ChatPage: React.FC = () => {
                 fetchMessages();
             }, 300);
         }
-    };
-
-    const onMessageDeleted = async () => {
-        await refetch();
     };
 
     const handleImageTap = (message: Message) => {
