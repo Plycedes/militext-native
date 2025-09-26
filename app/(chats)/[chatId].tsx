@@ -67,6 +67,7 @@ const ChatPage: React.FC = () => {
     const [selected, setSelected] = useState<string[]>([]);
     const [tempSelected, setTempSelected] = useState<string[]>([]);
     const [editing, setEditing] = useState<boolean>(false);
+    const [replyingTo, setReplyingTo] = useState<Message | null>(null);
 
     const [deleteDialogVisible, setDeleteDialogVisible] = useState<boolean>(false);
 
@@ -267,43 +268,45 @@ const ChatPage: React.FC = () => {
     };
 
     const onSend = async () => {
-        const content: string = input.trim();
-        setInput("");
+        try {
+            const content: string = input.trim();
+            setInput("");
 
-        if (editing) {
-            await MessageAPI.editMessage(selected[0], content);
-            await refetch();
-            setEditing(false);
-            setSelected([]);
-            return;
-        }
+            if (editing) {
+                await MessageAPI.editMessage(selected[0], content);
+                await refetch();
+                return;
+            }
 
-        if (!socket) return;
+            if (!socket) return;
 
-        let attachments: Attachment[] = [];
+            let attachments: Attachment[] = [];
 
-        if (images.length > 0) {
-            try {
+            if (images.length > 0) {
                 setLoading(true);
                 setLoadingMessage("Uploading Attachments");
                 const response = await MessageAPI.uploadAttachments(images);
                 attachments = response.data.data;
-            } catch (error: any) {
-                console.log(error);
-                console.log(error.response.data.message);
-            } finally {
-                setLoading(false);
-                setLoadingMessage("");
-                setImages([]);
             }
+
+            socket.emit(ChatEventEnum.NEW_MESSAGE_EVENT, {
+                chatId,
+                content,
+                attachments,
+                replyingTo: replyingTo ? replyingTo._id : null,
+            });
+        } catch (error: any) {
+            console.log(error);
+            console.log(error.response.data.message);
+        } finally {
+            setReplyingTo(null);
+            setInput("");
+            setLoading(false);
+            setLoadingMessage("");
+            setImages([]);
+            setEditing(false);
+            setSelected([]);
         }
-
-        setInput("");
-        socket.emit(ChatEventEnum.NEW_MESSAGE_EVENT, { chatId, content, attachments });
-
-        setTimeout(() => {
-            flatListRef.current?.scrollToEnd({ animated: true });
-        }, 50);
     };
 
     const onAttach = async () => {
@@ -322,7 +325,11 @@ const ChatPage: React.FC = () => {
     const onNewMessage = (message: Message) => {
         setMessages((prev) => [...prev, message]);
         setTimeout(() => {
-            flatListRef.current?.scrollToEnd({ animated: true });
+            flatListRef.current?.scrollToIndex({
+                index: messages.length - 1,
+                animated: true,
+                viewPosition: 0.5,
+            });
         }, 50);
     };
 
@@ -409,12 +416,12 @@ const ChatPage: React.FC = () => {
                         item={item}
                         isMe={isMe}
                         selected={selected}
-                        tempSelected={tempSelected}
                         currentDate={currentDate}
                         flatListRef={flatListRef}
+                        tempSelected={tempSelected}
                         setSelected={handleSelect}
-                        setTempSelected={setTempSelected}
                         handleImageTap={handleImageTap}
+                        setTempSelected={setTempSelected}
                         handleSwipeToReply={handleSwipeToReply}
                         findMessageIndexById={findMessageIndexById}
                     />
@@ -424,12 +431,12 @@ const ChatPage: React.FC = () => {
     };
 
     const handleSwipeToReply = (item: Message) => {
-        console.log("Replied");
+        setReplyingTo(item);
     };
 
     // Calculate proper content container padding based on keyboard state
     const getContentContainerPadding = () => {
-        const baseInputHeight = 80; // Approximate height of input area
+        const baseInputHeight = 100; // Approximate height of input area
         const additionalPadding = 20;
 
         if (isKeyboardVisible) {
@@ -543,6 +550,22 @@ const ChatPage: React.FC = () => {
                                 <View className="flex-row px-4 py-2 justify-between">
                                     <Text className="text-cyan-400">Attachments selected</Text>
                                     <TouchableOpacity onPress={() => setImages([])}>
+                                        <Ionicons name="close-sharp" size={16} color="#00d4ff" />
+                                    </TouchableOpacity>
+                                </View>
+                            )}
+
+                            {replyingTo && (
+                                <View className="flex-row px-4 py-2 justify-between">
+                                    <View className="mb-2 border-l-4 border-cyan-400/60 pl-2">
+                                        <Text className="text-cyan-300 text-xs font-semibold">
+                                            {replyingTo.sender?.username || "Unknown"}
+                                        </Text>
+                                        <Text className="text-slate-200 text-sm" numberOfLines={1}>
+                                            {replyingTo.content}
+                                        </Text>
+                                    </View>
+                                    <TouchableOpacity onPress={() => setReplyingTo(null)}>
                                         <Ionicons name="close-sharp" size={16} color="#00d4ff" />
                                     </TouchableOpacity>
                                 </View>
