@@ -5,6 +5,7 @@ import Header, { DropdownOption } from "./Header";
 import ImageViewer from "./ImageViewer";
 import InputField from "./InputField";
 import Loader from "./Loader";
+import MessageBubble from "./MessageBubble";
 import PasswordModal from "./PasswordModal";
 import ProfileImage from "./ProfileImage";
 import SimpleHeader from "./SimpleHeader";
@@ -19,6 +20,7 @@ export {
     ImageViewer,
     InputField,
     Loader,
+    MessageBubble,
     PasswordModal,
     ProfileImage,
     SimpleHeader,
