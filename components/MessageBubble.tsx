@@ -1,7 +1,7 @@
 import { Message } from "@/types/responseTypes";
 import { formatTimeOnly } from "@/utils/date-time";
 import { useRef } from "react";
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import { FlatList, Image, Text, TouchableOpacity, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
     runOnJS,
@@ -14,18 +14,26 @@ const MessageBubble = ({
     item,
     isMe,
     selected,
+    tempSelected,
     currentDate,
+    flatListRef,
     setSelected,
+    setTempSelected,
     handleImageTap,
     handleSwipeToReply,
+    findMessageIndexById,
 }: {
     item: Message;
     isMe: boolean;
     selected: string[];
+    tempSelected: string[];
     currentDate: Date;
+    flatListRef: React.RefObject<FlatList<Message> | null>;
     handleImageTap: (item: Message) => void;
     handleSwipeToReply: (item: Message) => void;
     setSelected: (itemId: string) => void;
+    setTempSelected: React.Dispatch<React.SetStateAction<string[]>>;
+    findMessageIndexById: (itemId: string) => number;
 }) => {
     const touchableRef = useRef(null);
 
@@ -54,95 +62,111 @@ const MessageBubble = ({
             translateX.value = withSpring(0, { damping: 15, stiffness: 120 });
         });
 
+    const scrollToIndex = () => {
+        const index = findMessageIndexById(item.replyingTo!._id);
+        setTimeout(() => {
+            setTempSelected([item.replyingTo!._id]);
+            flatListRef.current?.scrollToIndex({ index, animated: true, viewPosition: 0.5 });
+        }, 50);
+
+        setTimeout(() => {
+            setTempSelected([]);
+        }, 2000);
+    };
+
     return (
         <View
             style={{ width: "100%", paddingHorizontal: 16, marginBottom: 8 }}
-            className={`${selected.includes(item._id) ? "bg-cyan-300/20" : ""}`}
+            className={`${selected.includes(item._id) ? "bg-cyan-300/20" : ""} ${tempSelected.includes(item._id) ? "bg-cyan-300/20" : ""}`}
         >
             <GestureDetector gesture={panGesture}>
                 <Animated.View
                     style={[animatedStyle, { alignSelf: isMe ? "flex-end" : "flex-start" }]}
                 >
-                    <TouchableOpacity
-                        ref={touchableRef}
-                        activeOpacity={0.8}
+                    <View
                         className={`max-w-[80%] rounded-2xl px-4 py-3 ${
                             isMe
                                 ? "border border-slate-400/30 shadow-slate-400/20 shadow-md bg-slate-400/10"
                                 : "border border-cyan-400/30 shadow-cyan-400/20 shadow-md bg-cyan-400/10"
                         }`}
-                        onPress={() => {
-                            if (isMe && selected.length > 0) {
-                                setSelected(item._id);
-                            } else {
-                                console.log("Buble");
-                                handleImageTap(item);
-                            }
-                        }}
-                        onLongPress={() => {
-                            if (isMe) {
-                                console.log(item._id);
-                                setSelected(item._id);
-                            }
-                        }}
                     >
                         {/* Reply preview */}
                         {item.replyingTo && (
-                            <View className="mb-2 border-l-4 border-cyan-400/60 pl-2">
-                                <Text className="text-cyan-300 text-xs font-semibold">
-                                    {item.replyingTo.sender?.username || "Unknown"}
-                                </Text>
-                                <Text className="text-slate-200 text-sm" numberOfLines={1}>
-                                    {item.replyingTo.content}
-                                </Text>
-                            </View>
+                            <TouchableOpacity onPress={scrollToIndex}>
+                                <View className="mb-2 border-l-4 border-cyan-400/60 pl-2">
+                                    <Text className="text-cyan-300 text-xs font-semibold">
+                                        {item.replyingTo.sender?.username || "Unknown"}
+                                    </Text>
+                                    <Text className="text-slate-200 text-sm" numberOfLines={1}>
+                                        {item.replyingTo.content}
+                                    </Text>
+                                </View>
+                            </TouchableOpacity>
                         )}
-
-                        {/* Attachments */}
-                        {hasAttachments && (
-                            <View className="mt-2 relative">
-                                <Image
-                                    source={{ uri: attachments[0].url }}
-                                    className="w-48 h-48 rounded-lg"
-                                    resizeMode="cover"
-                                />
-                                {attachments.length > 1 && (
-                                    <View className="absolute bottom-2 right-2 bg-black/60 px-2 py-1 rounded-full">
-                                        <Text className="text-white text-xs font-semibold">
-                                            +{attachments.length - 1}
-                                        </Text>
-                                    </View>
-                                )}
-                            </View>
-                        )}
-
-                        {/* Text message */}
-                        {item.content && <Text className="text-white mt-1">{item.content}</Text>}
-
-                        {/* Timestamp & Edited */}
-                        <View
-                            className={`flex-row gap-1 mt-1 ${
-                                isMe ? "justify-end" : "justify-start"
-                            }`}
+                        <TouchableOpacity
+                            ref={touchableRef}
+                            activeOpacity={0.8}
+                            onPress={() => {
+                                if (isMe && selected.length > 0) {
+                                    setSelected(item._id);
+                                } else {
+                                    handleImageTap(item);
+                                }
+                            }}
+                            onLongPress={() => {
+                                if (isMe) {
+                                    setSelected(item._id);
+                                }
+                            }}
                         >
-                            <Text
-                                className={`${
-                                    isMe ? "text-slate-300/70" : "text-cyan-300/80"
-                                } text-xs`}
+                            {/* Attachments */}
+                            {hasAttachments && (
+                                <View className="mt-2 relative">
+                                    <Image
+                                        source={{ uri: attachments[0].url }}
+                                        className="w-48 h-48 rounded-lg"
+                                        resizeMode="cover"
+                                    />
+                                    {attachments.length > 1 && (
+                                        <View className="absolute bottom-2 right-2 bg-black/60 px-2 py-1 rounded-full">
+                                            <Text className="text-white text-xs font-semibold">
+                                                +{attachments.length - 1}
+                                            </Text>
+                                        </View>
+                                    )}
+                                </View>
+                            )}
+
+                            {/* Text message */}
+                            {item.content && (
+                                <Text className="text-white mt-1">{item.content}</Text>
+                            )}
+
+                            {/* Timestamp & Edited */}
+                            <View
+                                className={`flex-row gap-1 mt-1 ${
+                                    isMe ? "justify-end" : "justify-start"
+                                }`}
                             >
-                                {formatTimeOnly(currentDate)}
-                            </Text>
-                            {item.createdAt !== item.updatedAt && (
                                 <Text
                                     className={`${
                                         isMe ? "text-slate-300/70" : "text-cyan-300/80"
-                                    } text-xs italic`}
+                                    } text-xs`}
                                 >
-                                    Edited
+                                    {formatTimeOnly(currentDate)}
                                 </Text>
-                            )}
-                        </View>
-                    </TouchableOpacity>
+                                {item.createdAt !== item.updatedAt && (
+                                    <Text
+                                        className={`${
+                                            isMe ? "text-slate-300/70" : "text-cyan-300/80"
+                                        } text-xs italic`}
+                                    >
+                                        Edited
+                                    </Text>
+                                )}
+                            </View>
+                        </TouchableOpacity>
+                    </View>
                 </Animated.View>
             </GestureDetector>
         </View>

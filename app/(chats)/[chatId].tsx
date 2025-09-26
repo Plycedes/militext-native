@@ -65,6 +65,7 @@ const ChatPage: React.FC = () => {
     const [hasMore, setHasMore] = useState(true);
 
     const [selected, setSelected] = useState<string[]>([]);
+    const [tempSelected, setTempSelected] = useState<string[]>([]);
     const [editing, setEditing] = useState<boolean>(false);
 
     const [deleteDialogVisible, setDeleteDialogVisible] = useState<boolean>(false);
@@ -319,7 +320,6 @@ const ChatPage: React.FC = () => {
     };
 
     const onNewMessage = (message: Message) => {
-        console.log("New message");
         setMessages((prev) => [...prev, message]);
         setTimeout(() => {
             flatListRef.current?.scrollToEnd({ animated: true });
@@ -369,7 +369,6 @@ const ChatPage: React.FC = () => {
     };
 
     const handleImageTap = (message: Message) => {
-        console.log("Tapped");
         if (message.attachments.length > 0) {
             setAttachments(message.attachments);
             setOpenImageViewer(true);
@@ -377,10 +376,13 @@ const ChatPage: React.FC = () => {
     };
 
     const handleSelect = (itemId: string) => {
-        console.log("Here");
         setSelected((prev) =>
             prev.includes(itemId) ? prev.filter((id) => id !== itemId) : [...prev, itemId]
         );
+    };
+
+    const findMessageIndexById = (messageId: string): number => {
+        return messages.findIndex((msg) => msg._id === messageId);
     };
 
     const renderMessage = ({ item, index }: { item: Message; index: number }) => {
@@ -407,10 +409,14 @@ const ChatPage: React.FC = () => {
                         item={item}
                         isMe={isMe}
                         selected={selected}
+                        tempSelected={tempSelected}
                         currentDate={currentDate}
+                        flatListRef={flatListRef}
                         setSelected={handleSelect}
+                        setTempSelected={setTempSelected}
                         handleImageTap={handleImageTap}
                         handleSwipeToReply={handleSwipeToReply}
+                        findMessageIndexById={findMessageIndexById}
                     />
                 </View>
             </View>
